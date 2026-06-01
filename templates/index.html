@@ -305,7 +305,7 @@
     >
 
     <a class="hero-click hero-play" href="#fixtures">Play now</a>
-    <a class="hero-click hero-table" href="{{ url_for('leaderboard') }}">View leaderboard</a>
+    <a class="hero-click hero-table" href="/leaderboard">View leaderboard</a>
   </section>
 
   <section id="fixtures">
@@ -323,17 +323,17 @@
     {% if fixtures %}
       <div class="fixture-list">
         {% for fixture in fixtures %}
-          {% set fixture_id = fixture.id if fixture.id is defined else fixture['id'] %}
-          {% set home_name = fixture.home_team if fixture.home_team is defined else fixture['home_team'] %}
-          {% set away_name = fixture.away_team if fixture.away_team is defined else fixture['away_team'] %}
-          {% set home_code = fixture.home_code if fixture.home_code is defined else fixture['home_code'] %}
-          {% set away_code = fixture.away_code if fixture.away_code is defined else fixture['away_code'] %}
-          {% set group_name = fixture.group_name if fixture.group_name is defined else fixture['group_name'] %}
-          {% set venue = fixture.venue if fixture.venue is defined else fixture['venue'] %}
-          {% set kickoff_label = fixture.kickoff_label if fixture.kickoff_label is defined else fixture['kickoff_label'] %}
-          {% set entry_count = fixture.entry_count if fixture.entry_count is defined else fixture['entry_count'] if fixture['entry_count'] is defined else 0 %}
+          {% set fixture_id = fixture.id|default(fixture['id']) %}
+          {% set home_name = fixture.home_team|default(fixture['home_team']) %}
+          {% set away_name = fixture.away_team|default(fixture['away_team']) %}
+          {% set home_code = fixture.home_code|default(fixture['home_code']) %}
+          {% set away_code = fixture.away_code|default(fixture['away_code']) %}
+          {% set group_name = fixture.group_name|default(fixture['group_name']) %}
+          {% set venue = fixture.venue|default(fixture['venue']) %}
+          {% set kickoff_label = fixture.kickoff_label|default(fixture['kickoff_label']) %}
+          {% set entry_count = fixture.entry_count|default(0) %}
 
-          <a class="fixture-card" href="{{ url_for('match_page', match_id=fixture_id) }}">
+          <a class="fixture-card" href="/match/{{ fixture_id }}">
             <div class="fixture-meta">
               <span>{{ group_name }}</span>
               <span>{{ kickoff_label }}</span>
