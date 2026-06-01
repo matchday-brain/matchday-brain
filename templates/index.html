@@ -16,18 +16,31 @@
 {% block content %}
 
 <style>
-  /* Realistic football polish - keeps the working layout, replaces the CSS ball */
+  /* Final clean hero polish: no awkward generated image, clearer featured opener */
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+  }
+
+  body {
+    position: relative;
+    touch-action: pan-y;
+  }
+
   .premium-hero {
     position: relative;
     overflow: hidden;
     isolation: isolate;
     background:
-      radial-gradient(circle at 82% 20%, rgba(72, 148, 255, .26), transparent 30%),
-      radial-gradient(circle at 18% 12%, rgba(82, 196, 255, .14), transparent 30%),
-      linear-gradient(135deg, #06133a 0%, #0a2364 52%, #123f9f 100%) !important;
+      radial-gradient(circle at 86% 18%, rgba(67, 139, 255, .22), transparent 30%),
+      radial-gradient(circle at 10% 8%, rgba(83, 190, 255, .12), transparent 28%),
+      linear-gradient(135deg, #041238 0%, #071f5d 52%, #123f9c 100%) !important;
     border: 1px solid rgba(170, 205, 255, .22);
     box-shadow:
-      0 28px 70px rgba(0,0,0,.28),
+      0 28px 70px rgba(0,0,0,.30),
       inset 0 1px 0 rgba(255,255,255,.12);
   }
 
@@ -38,39 +51,40 @@
     z-index: -3;
     pointer-events: none;
     background:
-      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px) 0 0 / 64px 100%,
-      radial-gradient(ellipse at 86% 86%, rgba(255, 207, 74, .18), transparent 38%),
-      linear-gradient(180deg, rgba(255,255,255,.04), transparent 48%);
-    opacity: .72;
+      linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px) 0 0 / 64px 100%,
+      linear-gradient(180deg, rgba(255,255,255,.035), transparent 50%),
+      radial-gradient(ellipse at 74% 96%, rgba(255, 207, 74, .12), transparent 42%);
+    opacity: .8;
   }
 
-  .premium-hero .hero-real-ball {
+  /* Subtle football/pitch atmosphere without a fake-looking image */
+  .premium-hero::after {
+    content: "";
     position: absolute;
-    right: -70px;
-    bottom: 120px;
-    width: clamp(240px, 27vw, 380px);
-    height: auto;
-    z-index: 1;
+    right: -16%;
+    bottom: -22%;
+    width: 58%;
+    height: 42%;
+    z-index: -2;
     pointer-events: none;
-    opacity: .34;
-    filter:
-      drop-shadow(0 30px 42px rgba(0,0,0,.38))
-      drop-shadow(0 0 34px rgba(255,207,74,.12));
+    border-radius: 50%;
+    background:
+      radial-gradient(ellipse at center, rgba(255, 207, 74, .18), transparent 62%);
     transform: rotate(-8deg);
   }
 
+  .premium-hero .hero-topline,
   .premium-hero h1,
   .premium-hero p,
   .premium-hero .hero-actions,
-  .premium-hero .featured-match,
-  .premium-hero .hero-topline {
+  .premium-hero .featured-match {
     position: relative;
     z-index: 2;
   }
 
   .premium-hero h1 {
     max-width: 900px;
-    text-shadow: 0 14px 38px rgba(0,0,0,.28);
+    text-shadow: 0 14px 38px rgba(0,0,0,.30);
   }
 
   .premium-hero h1 em {
@@ -87,7 +101,7 @@
     max-width: 760px;
     padding-left: 18px;
     border-left: 3px solid rgba(255, 207, 74, .78);
-    color: rgba(229, 238, 255, .9);
+    color: rgba(229, 238, 255, .90);
   }
 
   .premium-hero .btn.primary {
@@ -104,23 +118,73 @@
     box-shadow: inset 0 1px 0 rgba(255,255,255,.15);
   }
 
+  /* Featured opener readability fix */
   .premium-hero .featured-match {
     margin-top: clamp(28px, 4vw, 46px);
-    background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(239,245,255,.96));
-    box-shadow: 0 24px 58px rgba(0,0,0,.24);
+    background: linear-gradient(180deg, #ffffff 0%, #edf4ff 100%) !important;
+    border: 1px solid rgba(255,255,255,.85);
+    box-shadow: 0 24px 58px rgba(0,0,0,.28);
+    color: #071229 !important;
+  }
+
+  .premium-hero .featured-match .ribbon {
+    background: linear-gradient(135deg, #1558f0 0%, #0731a2 100%);
+    color: #ffffff !important;
+    text-shadow: none;
+    box-shadow: 0 10px 22px rgba(10, 72, 210, .26);
+  }
+
+  .premium-hero .featured-match strong,
+  .premium-hero .feature-team strong {
+    color: #071229 !important;
+    text-shadow: none !important;
+  }
+
+  .premium-hero .feature-centre span,
+  .premium-hero .feature-centre small {
+    color: #6d7d9c !important;
+    text-shadow: none !important;
+    font-weight: 900;
+  }
+
+  .premium-hero .feature-centre b {
+    color: #1558f0 !important;
+    text-shadow: 0 8px 22px rgba(21, 88, 240, .16);
+  }
+
+  .premium-hero .flag-xl {
+    box-shadow: 0 14px 26px rgba(0,0,0,.16);
+  }
+
+  main,
+  .page,
+  .app,
+  .app-shell,
+  .site-shell,
+  .container,
+  .content,
+  .hero-card,
+  .premium-hero,
+  .featured-match,
+  .section-head,
+  .fixture-list,
+  .fixture-card {
+    max-width: 100%;
   }
 
   @media (max-width: 760px) {
-    .premium-hero {
-      padding-bottom: 24px;
+    html,
+    body {
+      overflow-x: hidden !important;
     }
 
-    .premium-hero .hero-real-ball {
-      right: -115px;
-      bottom: 205px;
-      width: 255px;
-      opacity: .24;
-      transform: rotate(-8deg);
+    .premium-hero {
+      max-width: calc(100vw - 24px);
+      margin-left: auto;
+      margin-right: auto;
+      box-sizing: border-box;
+      contain: paint;
+      padding-bottom: 24px;
     }
 
     .premium-hero h1 {
@@ -154,6 +218,13 @@
     .premium-hero .featured-match {
       margin-top: 24px;
     }
+
+    .featured-inner,
+    .teams-row,
+    .feature-team,
+    .team {
+      min-width: 0;
+    }
   }
 </style>
 
@@ -163,7 +234,6 @@
     <span class="tag tag-gold">World Cup 2026 test run</span>
     <span class="live-pill"><span class="pulse"></span>{% if today_predictions %}{{ today_predictions }} predictions today{% elif total_predictions %}{{ total_predictions }} predictions loaded{% else %}First calls now open{% endif %}</span>
   </div>
-  <img class="hero-real-ball" src="{{ url_for('static', filename='img/hero-football-realistic.png') }}" alt="" aria-hidden="true">
   <h1>Pick the score.<br>Guess the first goal.<br><em>Play for your country.</em></h1>
   <p>Fast, friendly pre-match predictions built for X. Choose a fixture, lock your call, and climb the country leaderboard before kick-off.</p>
   <p class="seo-intro">Matchday Brain is a free football prediction game for the 2026 global football tournament. Pick the correct score, guess the first goal minute and represent your country on the live fan leaderboard.</p>
