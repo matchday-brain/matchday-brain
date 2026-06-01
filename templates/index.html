@@ -1,127 +1,387 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Matchday Brain Hero Preview</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+{% extends "base.html" %}
 
-    html, body {
-      margin: 0;
-      min-height: 100%;
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at 8% 12%, rgba(76, 184, 255, .55), transparent 28%),
-        linear-gradient(135deg, #061431 0%, #1149d9 54%, #061431 100%);
-      color: #fff;
-    }
+{% block content %}
 
-    body {
-      padding: 28px;
-    }
+<style>
+  .home-wrap {
+    width: min(1180px, calc(100% - 28px));
+    margin: 0 auto;
+    padding: 18px 0 130px;
+  }
 
-    .page {
-      width: min(1500px, 100%);
-      margin: 0 auto;
-    }
+  .home-hero-image {
+    position: relative;
+    overflow: hidden;
+    border-radius: 30px;
+    border: 1px solid rgba(160, 200, 255, 0.28);
+    box-shadow:
+      0 28px 90px rgba(0, 0, 0, 0.38),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    background: #061437;
+    margin-bottom: 34px;
+  }
 
-    .hero-card {
-      position: relative;
+  .home-hero-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .hero-click {
+    position: absolute;
+    display: block;
+    border-radius: 16px;
+    text-indent: -9999px;
+    overflow: hidden;
+  }
+
+  .hero-click:focus-visible {
+    outline: 3px solid #ffffff;
+    outline-offset: 4px;
+  }
+
+  .hero-play {
+    left: 5.5%;
+    bottom: 5.6%;
+    width: 15.4%;
+    height: 8.8%;
+  }
+
+  .hero-table {
+    left: 23.1%;
+    bottom: 5.6%;
+    width: 20%;
+    height: 8.8%;
+  }
+
+  .fixtures-head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 18px;
+    margin: 26px 0 18px;
+  }
+
+  .fixtures-eyebrow {
+    color: #ffcf4a;
+    font-weight: 950;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  .fixtures-title {
+    margin: 0;
+    color: #ffffff;
+    font-size: clamp(30px, 4vw, 52px);
+    line-height: 0.95;
+    letter-spacing: -0.05em;
+    font-weight: 1000;
+  }
+
+  .loaded-pill {
+    flex: 0 0 auto;
+    border-radius: 999px;
+    padding: 16px 22px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+    font-weight: 950;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.16);
+  }
+
+  .fixture-list {
+    display: grid;
+    gap: 18px;
+  }
+
+  .fixture-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 84px minmax(0, 1fr);
+    gap: 16px;
+    align-items: center;
+    min-height: 134px;
+    padding: 22px 26px;
+    border-radius: 28px;
+    text-decoration: none;
+    background:
+      radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.96), rgba(235, 242, 255, 0.94) 62%, rgba(225, 234, 251, 0.96) 100%);
+    color: #061126;
+    border: 1px solid rgba(255,255,255,.52);
+    box-shadow: 0 18px 44px rgba(0,0,0,.18);
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+
+  .fixture-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 24px 60px rgba(0,0,0,.24);
+  }
+
+  .fixture-meta {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    color: #65728f;
+    font-size: 14px;
+    font-weight: 900;
+  }
+
+  .team-side {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .team-side.away {
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  .team-flag {
+    width: 74px;
+    height: 50px;
+    flex: 0 0 auto;
+    border-radius: 12px;
+    object-fit: cover;
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,.06);
+    box-shadow: 0 8px 18px rgba(0,0,0,.12);
+  }
+
+  .team-text {
+    min-width: 0;
+  }
+
+  .team-name {
+    font-size: 22px;
+    line-height: 1.04;
+    font-weight: 1000;
+    letter-spacing: -0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .team-code {
+    margin-top: 8px;
+    color: #65728f;
+    font-size: 13px;
+    letter-spacing: .18em;
+    font-weight: 950;
+    text-transform: uppercase;
+  }
+
+  .versus {
+    width: 66px;
+    height: 66px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    justify-self: center;
+    background:
+      radial-gradient(circle at 32% 25%, #2c78ff, #071a58 70%);
+    color: #ffffff;
+    font-weight: 1000;
+    box-shadow: 0 10px 28px rgba(17, 75, 214, .32);
+  }
+
+  .fixture-bottom {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    color: #65728f;
+    font-weight: 900;
+  }
+
+  .empty-fixtures {
+    border-radius: 28px;
+    padding: 34px;
+    color: #ffffff;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.14);
+  }
+
+  @media (max-width: 760px) {
+    .home-wrap {
       width: 100%;
-      border-radius: 30px;
-      overflow: hidden;
-      box-shadow:
-        0 30px 90px rgba(0, 0, 0, .38),
-        inset 0 1px 0 rgba(255,255,255,.18);
-      border: 1px solid rgba(150, 190, 255, .34);
-      background: #071735;
+      padding: 0 0 118px;
     }
 
-    .hero-card img {
-      display: block;
+    .home-hero-image {
+      border-radius: 0 0 28px 28px;
+      border-left: 0;
+      border-right: 0;
+      margin-bottom: 26px;
+    }
+
+    .home-hero-image img {
       width: 100%;
-      height: auto;
+      min-height: 520px;
+      object-fit: cover;
+      object-position: 36% center;
     }
 
-    /*
-      These invisible links sit over the visual buttons in the image.
-      They make the preview feel like the app while keeping the image exactly as designed.
-    */
-    .hero-link {
-      position: absolute;
+    .hero-play,
+    .hero-table {
+      display: none;
+    }
+
+    .fixtures-head {
+      padding: 0 22px;
+      align-items: center;
+    }
+
+    .loaded-pill {
+      padding: 14px 18px;
+      font-size: 16px;
+    }
+
+    .fixture-list {
+      padding: 0 18px;
+      gap: 18px;
+    }
+
+    .fixture-card {
+      grid-template-columns: minmax(0, 1fr) 72px minmax(0, 1fr);
+      padding: 24px 20px;
+      border-radius: 28px;
+      min-height: 166px;
+    }
+
+    .fixture-meta {
       display: block;
-      border-radius: 18px;
-      text-indent: -9999px;
-      overflow: hidden;
+      font-size: 19px;
+      line-height: 1.45;
     }
 
-    .hero-link:focus-visible {
-      outline: 3px solid #fff;
-      outline-offset: 4px;
+    .team-side {
+      gap: 10px;
     }
 
-    .play-link {
-      left: 5.8%;
-      bottom: 5.8%;
-      width: 15%;
-      height: 8.8%;
+    .team-side.away {
+      flex-direction: row-reverse;
+      text-align: left;
+      justify-content: flex-start;
     }
 
-    .leaderboard-link {
-      left: 23.2%;
-      bottom: 5.8%;
-      width: 19.5%;
-      height: 8.8%;
+    .team-flag {
+      width: 66px;
+      height: 46px;
+      border-radius: 11px;
     }
 
-    .note {
-      margin: 18px auto 0;
-      max-width: 980px;
-      color: rgba(255,255,255,.82);
-      font-size: 15px;
-      line-height: 1.5;
-      text-align: center;
+    .team-name {
+      font-size: 24px;
+      max-width: 126px;
     }
 
-    @media (max-width: 760px) {
-      body {
-        padding: 0;
-        background: #0f45d3;
-      }
-
-      .hero-card {
-        border-radius: 0 0 28px 28px;
-        border-left: 0;
-        border-right: 0;
-      }
-
-      /*
-        On mobile this image remains a faithful version of the design,
-        but it will be smaller text than the live app form sections.
-        For the final app version, we use this as the hero artwork and keep fixtures/form below.
-      */
-      .note {
-        padding: 0 18px 22px;
-        font-size: 14px;
-      }
+    .team-code {
+      display: none;
     }
-  </style>
-</head>
-<body>
-  <main class="page">
-    <section class="hero-card" aria-label="Matchday Brain World Cup prediction game hero">
-      <img src="matchday-brain-hero-football.png" alt="Matchday Brain football prediction game hero: Pick the score. Guess the first goal. Play for your country.">
-      <a class="hero-link play-link" href="#fixtures">Play now</a>
-      <a class="hero-link leaderboard-link" href="/leaderboard">View leaderboard</a>
-    </section>
 
-    <p class="note">
-      This preview uses the exact football-style hero artwork. In the live app, place the image at
-      <strong>static/img/matchday-brain-hero-football.png</strong> and update the homepage hero to use it.
-    </p>
-  </main>
-</body>
-</html>
+    .versus {
+      width: 64px;
+      height: 64px;
+      font-size: 18px;
+    }
+
+    .fixture-bottom {
+      font-size: 19px;
+      line-height: 1.35;
+    }
+  }
+</style>
+
+<div class="home-wrap">
+
+  <section class="home-hero-image" aria-label="Matchday Brain World Cup prediction game">
+    <img
+      src="{{ url_for('static', filename='img/matchday-brain-hero-football.png') }}"
+      alt="Matchday Brain football prediction game. Pick the score, guess the first goal and play for your country."
+    >
+
+    <a class="hero-click hero-play" href="#fixtures">Play now</a>
+    <a class="hero-click hero-table" href="{{ url_for('leaderboard') }}">View leaderboard</a>
+  </section>
+
+  <section id="fixtures">
+    <div class="fixtures-head">
+      <div>
+        <div class="fixtures-eyebrow">Fixtures</div>
+        <h2 class="fixtures-title">Choose a World Cup match</h2>
+      </div>
+
+      <div class="loaded-pill">
+        {{ fixtures|length if fixtures else 0 }} loaded
+      </div>
+    </div>
+
+    {% if fixtures %}
+      <div class="fixture-list">
+        {% for fixture in fixtures %}
+          {% set fixture_id = fixture.id if fixture.id is defined else fixture['id'] %}
+          {% set home_name = fixture.home_team if fixture.home_team is defined else fixture['home_team'] %}
+          {% set away_name = fixture.away_team if fixture.away_team is defined else fixture['away_team'] %}
+          {% set home_code = fixture.home_code if fixture.home_code is defined else fixture['home_code'] %}
+          {% set away_code = fixture.away_code if fixture.away_code is defined else fixture['away_code'] %}
+          {% set group_name = fixture.group_name if fixture.group_name is defined else fixture['group_name'] %}
+          {% set venue = fixture.venue if fixture.venue is defined else fixture['venue'] %}
+          {% set kickoff_label = fixture.kickoff_label if fixture.kickoff_label is defined else fixture['kickoff_label'] %}
+          {% set entry_count = fixture.entry_count if fixture.entry_count is defined else fixture['entry_count'] if fixture['entry_count'] is defined else 0 %}
+
+          <a class="fixture-card" href="{{ url_for('match_page', match_id=fixture_id) }}">
+            <div class="fixture-meta">
+              <span>{{ group_name }}</span>
+              <span>{{ kickoff_label }}</span>
+            </div>
+
+            <div class="team-side home">
+              <img
+                class="team-flag"
+                src="{{ url_for('static', filename='flags/' ~ home_code|lower ~ '.svg') }}"
+                alt="{{ home_name }} flag"
+                onerror="this.style.visibility='hidden';"
+              >
+              <div class="team-text">
+                <div class="team-name">{{ home_name }}</div>
+                <div class="team-code">{{ home_code }}</div>
+              </div>
+            </div>
+
+            <div class="versus">v</div>
+
+            <div class="team-side away">
+              <div class="team-text">
+                <div class="team-name">{{ away_name }}</div>
+                <div class="team-code">{{ away_code }}</div>
+              </div>
+              <img
+                class="team-flag"
+                src="{{ url_for('static', filename='flags/' ~ away_code|lower ~ '.svg') }}"
+                alt="{{ away_name }} flag"
+                onerror="this.style.visibility='hidden';"
+              >
+            </div>
+
+            <div class="fixture-bottom">
+              <span>{{ entry_count }} {{ 'entry' if entry_count == 1 else 'entries' }}</span>
+              <span>{{ venue }}</span>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-fixtures">
+        <h3>No fixtures loaded yet</h3>
+        <p>Fixtures will appear here once the schedule is loaded.</p>
+      </div>
+    {% endif %}
+  </section>
+
+</div>
+
+{% endblock %}
