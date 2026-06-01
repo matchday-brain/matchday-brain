@@ -333,7 +333,7 @@
           {% set kickoff_label = fixture.kickoff_label|default(fixture['kickoff_label']) %}
           {% set entry_count = fixture.entry_count|default(0) %}
 
-          <a class="fixture-card" href="{{ url_for('match', fixture_id=fixture_id) }}">
+          <a class="fixture-card" href="/match/{{ fixture_id }}">
             <div class="fixture-meta">
               <span>{{ group_name }}</span>
               <span>{{ kickoff_label }}</span>
