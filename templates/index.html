@@ -14,254 +14,212 @@
 {% endblock %}
 
 {% block content %}
+
 <style>
-  .premium-hero.football-hero-upgrade {
+  /* Clean homepage polish - keeps the working layout, removes awkward image box */
+  .premium-hero {
     position: relative;
     overflow: hidden;
     isolation: isolate;
-    padding: clamp(1.2rem, 2vw, 2rem);
     background:
-      radial-gradient(circle at 18% 18%, rgba(73, 140, 255, 0.16), transparent 32%),
-      linear-gradient(135deg, #05173f 0%, #0a2468 48%, #1540a6 100%);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 32px;
+      radial-gradient(circle at 82% 20%, rgba(72, 148, 255, .26), transparent 30%),
+      radial-gradient(circle at 18% 12%, rgba(82, 196, 255, .14), transparent 30%),
+      linear-gradient(135deg, #06133a 0%, #0a2364 52%, #123f9f 100%) !important;
+    border: 1px solid rgba(170, 205, 255, .22);
+    box-shadow:
+      0 28px 70px rgba(0,0,0,.28),
+      inset 0 1px 0 rgba(255,255,255,.12);
   }
 
-  .premium-hero.football-hero-upgrade::before {
+  .premium-hero::before {
     content: "";
     position: absolute;
     inset: 0;
-    background:
-      linear-gradient(90deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 56px),
-      linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0));
-    opacity: 0.22;
+    z-index: -3;
     pointer-events: none;
-    z-index: 0;
+    background:
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px) 0 0 / 64px 100%,
+      radial-gradient(ellipse at 86% 86%, rgba(255, 207, 74, .20), transparent 38%),
+      linear-gradient(180deg, rgba(255,255,255,.04), transparent 48%);
+    opacity: .72;
   }
 
-  .premium-hero.football-hero-upgrade::after {
+  /* Stadium sweep */
+  .premium-hero .hero-topline::after {
     content: "";
     position: absolute;
-    left: -10%;
-    right: -10%;
-    bottom: -125px;
-    height: 230px;
-    background: radial-gradient(ellipse at center, rgba(255, 199, 58, 0.24), rgba(255, 199, 58, 0) 68%);
+    right: -110px;
+    bottom: -480px;
+    width: 520px;
+    height: 520px;
+    border-radius: 50%;
+    border: 26px solid rgba(255, 207, 74, .16);
+    border-left-color: transparent;
+    border-top-color: transparent;
+    transform: rotate(-22deg);
     pointer-events: none;
-    z-index: 0;
+    z-index: -1;
   }
 
-  .football-hero-upgrade .hero-topline,
-  .football-hero-upgrade .hero-main,
-  .football-hero-upgrade .featured-match {
+  /* CSS football - subtle, clean, no image box */
+  .premium-hero::after {
+    content: "";
+    position: absolute;
+    right: clamp(-105px, -4vw, -40px);
+    bottom: clamp(128px, 13vw, 175px);
+    width: clamp(210px, 28vw, 365px);
+    aspect-ratio: 1;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: 50%;
+    opacity: .42;
+    background:
+      radial-gradient(circle at 32% 25%, rgba(255,255,255,.88) 0 6%, transparent 7%),
+      radial-gradient(circle at 61% 47%, rgba(6,18,52,.95) 0 10%, transparent 10.8%),
+      radial-gradient(circle at 36% 58%, rgba(6,18,52,.95) 0 8.5%, transparent 9.2%),
+      radial-gradient(circle at 72% 70%, rgba(6,18,52,.95) 0 8.5%, transparent 9.2%),
+      conic-gradient(from 20deg,
+        #f7f9ff 0 11%,
+        #d8e2f4 11% 19%,
+        #0a1b4f 19% 29%,
+        #f5c94b 29% 38%,
+        #f6f8ff 38% 51%,
+        #0a1b4f 51% 61%,
+        #d8e2f4 61% 74%,
+        #f4c548 74% 84%,
+        #081944 84% 92%,
+        #f7f9ff 92% 100%);
+    box-shadow:
+      0 32px 46px rgba(0,0,0,.34),
+      inset -28px -36px 62px rgba(0,0,0,.44),
+      inset 22px 20px 44px rgba(255,255,255,.20),
+      0 0 62px rgba(255,207,74,.16);
+    transform: rotate(-12deg);
+  }
+
+  .premium-hero h1,
+  .premium-hero p,
+  .premium-hero .hero-actions,
+  .premium-hero .featured-match,
+  .premium-hero .hero-topline {
     position: relative;
     z-index: 2;
   }
 
-  .football-hero-upgrade .hero-main {
-    display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
-    gap: clamp(1rem, 2vw, 2rem);
-    align-items: center;
-    margin-top: 1rem;
+  .premium-hero h1 {
+    max-width: 900px;
+    text-shadow: 0 14px 38px rgba(0,0,0,.28);
   }
 
-  .football-hero-upgrade .hero-copy h1 {
+  .premium-hero h1 em {
+    color: #ffcf4a;
+    font-style: normal;
+    text-shadow: 0 10px 32px rgba(255, 204, 64, .22);
+  }
+
+  .premium-hero p {
+    max-width: 780px;
+  }
+
+  .premium-hero .seo-intro {
     max-width: 760px;
-    margin-bottom: 1rem;
+    padding-left: 18px;
+    border-left: 3px solid rgba(255, 207, 74, .78);
+    color: rgba(229, 238, 255, .9);
   }
 
-  .football-hero-upgrade .hero-copy p,
-  .football-hero-upgrade .seo-intro {
-    max-width: 640px;
+  .premium-hero .hero-actions {
+    gap: 14px;
   }
 
-  .football-hero-upgrade .seo-intro {
-    margin-top: 1rem;
-    padding-left: 1rem;
-    border-left: 3px solid rgba(255, 204, 64, 0.8);
-    color: rgba(232, 238, 255, 0.9);
+  .premium-hero .btn.primary {
+    background: linear-gradient(135deg, #fff088 0%, #ffc531 55%, #ff9f17 100%);
+    color: #071229;
+    box-shadow:
+      0 16px 34px rgba(255, 188, 38, .26),
+      inset 0 1px 0 rgba(255,255,255,.68);
   }
 
-  .football-hero-upgrade .hero-actions {
-    margin-top: 1.35rem;
-    display: flex;
-    gap: 0.9rem;
-    flex-wrap: wrap;
+  .premium-hero .btn.glass {
+    background: rgba(255,255,255,.09);
+    border: 1px solid rgba(196, 218, 255, .44);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.15);
   }
 
-  .football-hero-upgrade .hero-visual {
-    position: relative;
-    min-height: 360px;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
+  .premium-hero .featured-match {
+    margin-top: clamp(28px, 4vw, 46px);
+    background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(239,245,255,.96));
+    box-shadow: 0 24px 58px rgba(0,0,0,.24);
   }
 
-  .football-hero-upgrade .hero-visual::before {
-    content: "";
-    position: absolute;
-    inset: 14% 10% 8% 10%;
-    border-radius: 28px;
-    background:
-      radial-gradient(circle at 65% 28%, rgba(255,255,255,0.32), transparent 18%),
-      linear-gradient(180deg, rgba(7,22,63,0.18), rgba(4,13,35,0.55));
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
-    opacity: 0.95;
+  .premium-hero .ribbon {
+    box-shadow: 0 10px 22px rgba(10, 72, 210, .26);
   }
 
-  .football-hero-upgrade .hero-visual::after {
-    content: "";
-    position: absolute;
-    right: 12%;
-    bottom: 4%;
-    width: 78%;
-    height: 16px;
-    border-radius: 50%;
-    background: radial-gradient(ellipse at center, rgba(0,0,0,0.38), rgba(0,0,0,0));
-    filter: blur(8px);
-  }
-
-  .football-hero-upgrade .hero-ball-deco {
-    position: relative;
-    width: min(100%, 420px);
-    z-index: 1;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    pointer-events: none;
-    filter: drop-shadow(0 24px 40px rgba(0,0,0,0.42));
-  }
-
-  .football-hero-upgrade .hero-ball-deco img {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-
-  .football-hero-upgrade .hero-visual-copy {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    left: 1rem;
-    display: flex;
-    justify-content: flex-end;
-    pointer-events: none;
-  }
-
-  .football-hero-upgrade .hero-mini-points {
-    display: inline-flex;
-    gap: 1.25rem;
-    margin-top: 1.2rem;
-    flex-wrap: wrap;
-    color: rgba(250, 204, 70, 0.95);
-    font-weight: 700;
-    letter-spacing: 0.02em;
-  }
-
-  .football-hero-upgrade .hero-mini-points span {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    color: rgba(235, 241, 255, 0.92);
-  }
-
-  .football-hero-upgrade .hero-mini-points b {
-    color: #f7c645;
-    font-weight: 800;
-  }
-
-  .football-hero-upgrade .featured-match {
-    margin-top: 1.6rem;
-    backdrop-filter: blur(8px);
-    background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(241,245,255,0.96));
-  }
-
-  @media (max-width: 980px) {
-    .football-hero-upgrade .hero-main {
-      grid-template-columns: 1fr;
+  @media (max-width: 760px) {
+    .premium-hero {
+      padding-bottom: 24px;
     }
 
-    .football-hero-upgrade .hero-copy h1,
-    .football-hero-upgrade .hero-copy p,
-    .football-hero-upgrade .seo-intro {
+    .premium-hero::after {
+      right: -92px;
+      bottom: 250px;
+      width: 235px;
+      opacity: .24;
+    }
+
+    .premium-hero .hero-topline::after {
+      right: -210px;
+      bottom: -520px;
+      opacity: .4;
+    }
+
+    .premium-hero h1 {
+      font-size: clamp(48px, 13.5vw, 72px);
+      line-height: .9;
       max-width: 100%;
     }
 
-    .football-hero-upgrade .hero-visual {
-      min-height: 280px;
-      order: 2;
-    }
-  }
-
-  @media (max-width: 720px) {
-    .premium-hero.football-hero-upgrade {
-      padding: 1rem;
-      border-radius: 24px;
+    .premium-hero p {
+      max-width: 100%;
     }
 
-    .football-hero-upgrade .hero-main {
-      gap: 0.5rem;
+    .premium-hero .seo-intro {
+      display: none;
     }
 
-    .football-hero-upgrade .hero-actions {
+    .premium-hero .hero-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 0.8rem;
+      gap: 12px;
     }
 
-    .football-hero-upgrade .hero-actions .btn {
+    .premium-hero .hero-actions .btn {
       width: 100%;
+      min-width: 0;
       justify-content: center;
+      padding-left: 10px;
+      padding-right: 10px;
     }
 
-    .football-hero-upgrade .hero-visual {
-      min-height: 220px;
-      margin-top: 0.4rem;
-    }
-
-    .football-hero-upgrade .hero-ball-deco {
-      width: min(100%, 250px);
-      opacity: 0.95;
-    }
-
-    .football-hero-upgrade .hero-mini-points {
-      gap: 0.8rem 1rem;
-      font-size: 0.92rem;
+    .premium-hero .featured-match {
+      margin-top: 24px;
     }
   }
 </style>
 
 {% set featured = fixtures[0] if fixtures else none %}
-<section class="hero-card premium-hero football-hero-upgrade">
+<section class="hero-card premium-hero">
   <div class="hero-topline">
     <span class="tag tag-gold">World Cup 2026 test run</span>
     <span class="live-pill"><span class="pulse"></span>{% if today_predictions %}{{ today_predictions }} predictions today{% elif total_predictions %}{{ total_predictions }} predictions loaded{% else %}First calls now open{% endif %}</span>
   </div>
-
-  <div class="hero-main">
-    <div class="hero-copy">
-      <h1>Pick the score.<br>Guess the first goal.<br><em>Play for your country.</em></h1>
-      <p>Fast, friendly pre-match predictions built for X. Choose a fixture, lock your call, and climb the country leaderboard before kick-off.</p>
-      <p class="seo-intro">Matchday Brain is a free football prediction game for the 2026 global football tournament. Pick the correct score, guess the first goal minute and represent your country on the live fan leaderboard.</p>
-      <div class="hero-actions">
-        <a class="btn primary" href="#fixtures">Play now</a>
-        <a class="btn glass" href="{{ url_for('leaderboard') }}">View leaderboard</a>
-      </div>
-      <div class="hero-mini-points">
-        <span><b>◎</b> Predict</span>
-        <span><b>◔</b> Be first</span>
-        <span><b>🏆</b> Represent</span>
-      </div>
-    </div>
-
-    <div class="hero-visual" aria-hidden="true">
-      <div class="hero-visual-copy">
-      </div>
-      <div class="hero-ball-deco">
-        <img src="{{ url_for('static', filename='img/hero-football-realistic.png') }}" alt="">
-      </div>
-    </div>
+  <h1>Pick the score.<br>Guess the first goal.<br><em>Play for your country.</em></h1>
+  <p>Fast, friendly pre-match predictions built for X. Choose a fixture, lock your call, and climb the country leaderboard before kick-off.</p>
+  <p class="seo-intro">Matchday Brain is a free football prediction game for the 2026 global football tournament. Pick the correct score, guess the first goal minute and represent your country on the live fan leaderboard.</p>
+  <div class="hero-actions">
+    <a class="btn primary" href="#fixtures">Play now</a>
+    <a class="btn glass" href="{{ url_for('leaderboard') }}">View leaderboard</a>
   </div>
 
   {% if featured %}
@@ -325,6 +283,12 @@
         </div>
       </a>
     {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-card glass-panel">
+    <h3>No World Cup fixtures yet</h3>
+    <p>Open Admin and load the clean World Cup schedule.</p>
+    <a class="btn primary" href="{{ url_for('admin_login') }}">Go to admin</a>
   </div>
 {% endif %}
 {% endblock %}
