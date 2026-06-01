@@ -16,75 +16,160 @@
 {% block content %}
 
 <style>
-  /* Final clean hero polish: no awkward generated image, clearer featured opener */
-  html,
-  body {
+  /* Final homepage polish: stronger football feel + hard mobile sideways-scroll lock */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
     width: 100%;
     max-width: 100%;
-    overflow-x: hidden;
+    overflow-x: hidden !important;
     overscroll-behavior-x: none;
   }
 
   body {
-    position: relative;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden !important;
+    overscroll-behavior-x: none;
     touch-action: pan-y;
+  }
+
+  @supports (overflow: clip) {
+    html,
+    body {
+      overflow-x: clip !important;
+    }
+  }
+
+  img,
+  svg,
+  video,
+  canvas {
+    max-width: 100%;
+  }
+
+  main,
+  .page,
+  .app,
+  .app-shell,
+  .site-shell,
+  .container,
+  .content,
+  .wrap,
+  .hero-card,
+  .premium-hero,
+  .featured-match,
+  .section-head,
+  .fixture-list,
+  .fixture-card,
+  .bottom-nav,
+  .mobile-nav,
+  .nav-bar,
+  .site-header,
+  header {
+    max-width: 100vw !important;
   }
 
   .premium-hero {
     position: relative;
-    overflow: hidden;
+    overflow: hidden !important;
     isolation: isolate;
     background:
-      radial-gradient(circle at 86% 18%, rgba(67, 139, 255, .22), transparent 30%),
-      radial-gradient(circle at 10% 8%, rgba(83, 190, 255, .12), transparent 28%),
-      linear-gradient(135deg, #041238 0%, #071f5d 52%, #123f9c 100%) !important;
-    border: 1px solid rgba(170, 205, 255, .22);
+      radial-gradient(circle at 82% 12%, rgba(77, 159, 255, .32), transparent 24%),
+      radial-gradient(circle at 6% 0%, rgba(41, 197, 255, .17), transparent 26%),
+      linear-gradient(135deg, #041136 0%, #071f5c 48%, #123f9d 100%) !important;
+    border: 1px solid rgba(170, 205, 255, .24);
     box-shadow:
-      0 28px 70px rgba(0,0,0,.30),
+      0 30px 72px rgba(0,0,0,.32),
       inset 0 1px 0 rgba(255,255,255,.12);
+    contain: paint;
   }
 
+  /* Pitch/stadium lines instead of a fake AI ball */
   .premium-hero::before {
     content: "";
     position: absolute;
     inset: 0;
-    z-index: -3;
+    z-index: -4;
     pointer-events: none;
     background:
       linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px) 0 0 / 64px 100%,
-      linear-gradient(180deg, rgba(255,255,255,.035), transparent 50%),
-      radial-gradient(ellipse at 74% 96%, rgba(255, 207, 74, .12), transparent 42%);
-    opacity: .8;
+      linear-gradient(180deg, rgba(255,255,255,.035), transparent 46%),
+      radial-gradient(ellipse at 76% 100%, rgba(35, 255, 120, .10), transparent 44%);
+    opacity: .86;
   }
 
-  /* Subtle football/pitch atmosphere without a fake-looking image */
   .premium-hero::after {
     content: "";
     position: absolute;
-    right: -16%;
-    bottom: -22%;
-    width: 58%;
-    height: 42%;
-    z-index: -2;
+    right: -90px;
+    bottom: -88px;
+    width: min(520px, 58vw);
+    aspect-ratio: 1;
+    z-index: -3;
     pointer-events: none;
     border-radius: 50%;
-    background:
-      radial-gradient(ellipse at center, rgba(255, 207, 74, .18), transparent 62%);
-    transform: rotate(-8deg);
+    border: 18px solid rgba(255, 207, 74, .16);
+    border-left-color: rgba(255,255,255,.06);
+    border-top-color: transparent;
+    transform: rotate(-18deg);
+    box-shadow: 0 0 80px rgba(255, 207, 74, .08);
   }
 
-  .premium-hero .hero-topline,
+  .premium-hero .hero-topline {
+    position: relative;
+    z-index: 3;
+  }
+
+  .premium-hero .hero-topline::before {
+    content: "";
+    position: absolute;
+    right: 12px;
+    top: 52px;
+    width: 190px;
+    height: 76px;
+    z-index: -1;
+    pointer-events: none;
+    opacity: .42;
+    background:
+      radial-gradient(circle at 10% 30%, rgba(255,255,255,.9) 0 2px, transparent 3px),
+      radial-gradient(circle at 25% 22%, rgba(255,255,255,.8) 0 2px, transparent 3px),
+      radial-gradient(circle at 40% 15%, rgba(255,255,255,.7) 0 2px, transparent 3px),
+      radial-gradient(circle at 55% 10%, rgba(255,255,255,.65) 0 2px, transparent 3px),
+      radial-gradient(circle at 70% 8%, rgba(255,255,255,.55) 0 2px, transparent 3px),
+      radial-gradient(circle at 85% 12%, rgba(255,255,255,.5) 0 2px, transparent 3px);
+    filter: drop-shadow(0 0 18px rgba(91, 159, 255, .75));
+    transform: rotate(-10deg);
+  }
+
+  .premium-hero .tag-gold {
+    background: linear-gradient(135deg, #fff08a 0%, #ffcb44 55%, #ffaf1a 100%);
+    color: #071229;
+    box-shadow: 0 12px 26px rgba(255, 190, 40, .24);
+  }
+
+  .premium-hero .live-pill {
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(210, 228, 255, .28);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.16);
+    backdrop-filter: blur(12px);
+  }
+
   .premium-hero h1,
   .premium-hero p,
   .premium-hero .hero-actions,
   .premium-hero .featured-match {
     position: relative;
-    z-index: 2;
+    z-index: 3;
   }
 
   .premium-hero h1 {
-    max-width: 900px;
-    text-shadow: 0 14px 38px rgba(0,0,0,.30);
+    max-width: 920px;
+    text-shadow: 0 16px 44px rgba(0,0,0,.32);
   }
 
   .premium-hero h1 em {
@@ -94,35 +179,40 @@
   }
 
   .premium-hero p {
-    max-width: 780px;
+    max-width: 800px;
   }
 
   .premium-hero .seo-intro {
-    max-width: 760px;
+    max-width: 780px;
     padding-left: 18px;
-    border-left: 3px solid rgba(255, 207, 74, .78);
-    color: rgba(229, 238, 255, .90);
+    border-left: 3px solid rgba(255, 207, 74, .82);
+    color: rgba(229, 238, 255, .92);
+    background: linear-gradient(90deg, rgba(255,207,74,.06), transparent 70%);
+  }
+
+  .premium-hero .hero-actions {
+    gap: 14px;
   }
 
   .premium-hero .btn.primary {
     background: linear-gradient(135deg, #fff088 0%, #ffc531 55%, #ff9f17 100%);
     color: #071229;
     box-shadow:
-      0 16px 34px rgba(255, 188, 38, .26),
-      inset 0 1px 0 rgba(255,255,255,.68);
+      0 16px 34px rgba(255, 188, 38, .28),
+      inset 0 1px 0 rgba(255,255,255,.72);
   }
 
   .premium-hero .btn.glass {
-    background: rgba(255,255,255,.09);
-    border: 1px solid rgba(196, 218, 255, .44);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.15);
+    background: rgba(255,255,255,.095);
+    border: 1px solid rgba(196, 218, 255, .48);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.16);
   }
 
-  /* Featured opener readability fix */
+  /* Featured opener readability */
   .premium-hero .featured-match {
     margin-top: clamp(28px, 4vw, 46px);
     background: linear-gradient(180deg, #ffffff 0%, #edf4ff 100%) !important;
-    border: 1px solid rgba(255,255,255,.85);
+    border: 1px solid rgba(255,255,255,.88);
     box-shadow: 0 24px 58px rgba(0,0,0,.28);
     color: #071229 !important;
   }
@@ -131,7 +221,7 @@
     background: linear-gradient(135deg, #1558f0 0%, #0731a2 100%);
     color: #ffffff !important;
     text-shadow: none;
-    box-shadow: 0 10px 22px rgba(10, 72, 210, .26);
+    box-shadow: 0 10px 22px rgba(10, 72, 210, .28);
   }
 
   .premium-hero .featured-match strong,
@@ -142,7 +232,7 @@
 
   .premium-hero .feature-centre span,
   .premium-hero .feature-centre small {
-    color: #6d7d9c !important;
+    color: #647492 !important;
     text-shadow: none !important;
     font-weight: 900;
   }
@@ -156,35 +246,47 @@
     box-shadow: 0 14px 26px rgba(0,0,0,.16);
   }
 
-  main,
-  .page,
-  .app,
-  .app-shell,
-  .site-shell,
-  .container,
-  .content,
-  .hero-card,
-  .premium-hero,
-  .featured-match,
-  .section-head,
-  .fixture-list,
-  .fixture-card {
-    max-width: 100%;
-  }
-
   @media (max-width: 760px) {
     html,
     body {
       overflow-x: hidden !important;
+      max-width: 100vw !important;
+    }
+
+    @supports (overflow: clip) {
+      html,
+      body {
+        overflow-x: clip !important;
+      }
+    }
+
+    .site-header,
+    header {
+      max-width: 100vw !important;
+      overflow-x: hidden !important;
     }
 
     .premium-hero {
-      max-width: calc(100vw - 24px);
-      margin-left: auto;
-      margin-right: auto;
-      box-sizing: border-box;
-      contain: paint;
+      width: calc(100vw - 24px) !important;
+      max-width: calc(100vw - 24px) !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
       padding-bottom: 24px;
+      box-sizing: border-box;
+      contain: paint layout;
+    }
+
+    .premium-hero::after {
+      right: -175px;
+      bottom: -122px;
+      width: 360px;
+      opacity: .78;
+    }
+
+    .premium-hero .hero-topline::before {
+      right: -70px;
+      top: 80px;
+      opacity: .28;
     }
 
     .premium-hero h1 {
@@ -217,6 +319,8 @@
 
     .premium-hero .featured-match {
       margin-top: 24px;
+      max-width: 100% !important;
+      overflow: hidden;
     }
 
     .featured-inner,
@@ -224,6 +328,24 @@
     .feature-team,
     .team {
       min-width: 0;
+    }
+
+    .section-head,
+    .fixture-list {
+      width: calc(100vw - 24px) !important;
+      max-width: calc(100vw - 24px) !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      overflow-x: hidden !important;
+    }
+
+    .bottom-nav,
+    .mobile-nav {
+      left: 12px !important;
+      right: 12px !important;
+      width: auto !important;
+      max-width: calc(100vw - 24px) !important;
+      overflow: hidden !important;
     }
   }
 </style>
