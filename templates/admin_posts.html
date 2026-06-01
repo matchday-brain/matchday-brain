@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Low-cost X engine</p>
+    <h1>Post planner</h1>
+  </div>
+  <a class="btn ghost" href="{{ url_for('admin_home') }}">Back</a>
+</section>
+
+<div class="admin-nav">
+  <a class="btn primary" href="{{ url_for('admin_content') }}">Open content engine</a>
+  <a class="btn ghost" href="{{ url_for('admin_post_new') }}">New post</a>
+  <a class="btn ghost" href="{{ url_for('admin_post_suggest') }}">Suggest from game data</a>
+</div>
+
+<section class="panel">
+  <h2>Planned posts</h2>
+  {% for p in posts %}
+    <article class="post-card">
+      <div class="post-head">
+        <div>
+          <strong>{{ p.title }}</strong>
+          <small>{{ p.scheduled_at or 'No time set' }} · {{ p.status }}</small>
+        </div>
+        <form method="post" class="inline-status">
+          <input type="hidden" name="post_id" value="{{ p.id }}">
+          <select name="status">
+            {% for s in ['draft','scheduled','posted','ignored'] %}<option {% if p.status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+          </select>
+          <button class="btn ghost small" type="submit">Update</button>
+        </form>
+      </div>
+      <pre>{{ p.body }}</pre>
+      {% if p.image_note %}<p class="muted">Image/card: {{ p.image_note }}</p>{% endif %}
+      <div class="hero-actions">
+        <button class="btn primary small" data-copy="{{ p.body }}">Copy text</button>
+        <a class="btn ghost small" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text={{ p.body|urlencode }}">Open in X</a>
+      </div>
+    </article>
+  {% else %}
+    <p>No posts yet.</p>
+  {% endfor %}
+</section>
+{% endblock %}

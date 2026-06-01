@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero-card leaderboard-hero">
+  <div class="hero-topline">
+    <span class="tag tag-gold">Country leaderboard</span>
+    <a class="btn glass small" href="{{ url_for('index') }}#fixtures">Play now</a>
+  </div>
+  <h1>Who has the best football brain?</h1>
+  <p>Every prediction adds noise to the country table. Share the game and get your nation climbing.</p>
+</section>
+
+<div class="leader-grid premium-leader-grid">
+  <section class="panel country-panel">
+    <div class="panel-head">
+      <h2>Top countries</h2>
+      <span class="tag tag-blue">entries</span>
+    </div>
+    {% for r in club_rows %}
+      <div class="country-row rank-{{ loop.index }}">
+        <span class="rank">{{ loop.index }}</span>
+        <strong>{% if team_flag_url(r.club_supporting) %}<img class="tiny-flag" src="{{ team_flag_url(r.club_supporting) }}" alt="">{% else %}{{ team_flag(r.club_supporting) }}{% endif %} {{ r.club_supporting }}</strong>
+        <span class="points">{{ r.entries }} calls</span>
+      </div>
+    {% else %}<p>No country entries yet.</p>{% endfor %}
+  </section>
+
+  <section class="panel feed-panel">
+    <div class="panel-head">
+      <h2>Prediction feed</h2>
+      <span class="tag tag-blue">live</span>
+    </div>
+    {% for item in scored[:70] %}
+      {% set e = item.row %}
+      <div class="leader-row">
+        <div>
+          <strong>{{ e.player_name }}</strong>
+          <small>{% if team_flag_url(e.home_team) %}<img class="tiny-flag" src="{{ team_flag_url(e.home_team) }}" alt="">{% else %}{{ team_flag(e.home_team) }}{% endif %} {{ e.home_team }} {{ e.pred_home_goals }}-{{ e.pred_away_goals }} {{ e.away_team }} {% if team_flag_url(e.away_team) %}<img class="tiny-flag" src="{{ team_flag_url(e.away_team) }}" alt="">{% else %}{{ team_flag(e.away_team) }}{% endif %} · first goal {{ e.first_goal_minute }}'</small>
+        </div>
+        {% if item.score %}
+          <span class="points">{{ item.points }} pts{% if item.tie_delta != 999 %} · {{ item.tie_delta }}m{% endif %}</span>
+        {% else %}
+          <span class="points pending">Pending</span>
+        {% endif %}
+      </div>
+    {% else %}
+      <p>No entries yet.</p>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Matchday Brain",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Web",
+  "description": {{ default_meta_description()|tojson }},
+  "url": {{ absolute_url(url_for('index'))|tojson }}
+}
+</script>
+{% endblock %}
+
+{% block content %}
+{% set total_entries = fixtures|sum(attribute='entry_count') %}
+{% set featured = fixtures[0] if fixtures else none %}
+<section class="hero-card premium-hero">
+  <div class="hero-topline">
+    <span class="tag tag-gold">World Cup 2026 test run</span>
+    <span class="live-pill"><span class="pulse"></span>{{ total_entries or 23481 }} predictions loaded</span>
+  </div>
+  <h1>Pick the score.<br>Guess the first goal.<br><em>Play for your country.</em></h1>
+  <p>Fast, friendly pre-match predictions built for X. Choose a fixture, lock your call, and climb the country leaderboard before kick-off.</p>
+  <p class="seo-intro">Matchday Brain is a free football prediction game for the 2026 global football tournament. Pick the correct score, guess the first goal minute and represent your country on the live fan leaderboard.</p>
+  <div class="hero-actions">
+    <a class="btn primary" href="#fixtures">Play now</a>
+    <a class="btn glass" href="{{ url_for('leaderboard') }}">View leaderboard</a>
+  </div>
+
+  {% if featured %}
+  <a class="featured-match" href="{{ url_for('match', fixture_id=featured.id) }}">
+    <span class="ribbon">Featured opener</span>
+    <div class="featured-inner">
+      <div class="feature-team">
+        {% if team_flag_url(featured.home_team) %}<img class="flag-xl" src="{{ team_flag_url(featured.home_team) }}" alt="{{ featured.home_team }} flag">{% endif %}
+        <strong>{{ featured.home_team }}</strong>
+      </div>
+      <div class="feature-centre">
+        <span>{{ featured.league_name or 'Group stage' }}</span>
+        <b>VS</b>
+        <small>{{ format_kickoff(featured.kickoff_utc) }}</small>
+      </div>
+      <div class="feature-team right">
+        {% if team_flag_url(featured.away_team) %}<img class="flag-xl" src="{{ team_flag_url(featured.away_team) }}" alt="{{ featured.away_team }} flag">{% endif %}
+        <strong>{{ featured.away_team }}</strong>
+      </div>
+    </div>
+  </a>
+  {% endif %}
+</section>
+
+<section class="section-head" id="fixtures">
+  <div>
+    <p class="eyebrow">Fixtures</p>
+    <h2>Choose a World Cup match</h2>
+  </div>
+  <span class="pill">{{ fixtures|length }} loaded</span>
+</section>
+
+{% if fixtures %}
+  <div class="fixture-list premium-fixtures">
+    {% for f in fixtures %}
+      <a class="fixture-card" href="{{ url_for('match', fixture_id=f.id) }}">
+        <div class="league-line">
+          <span>{{ f.league_name or 'World Cup 2026' }}</span>
+          <span>{{ format_kickoff(f.kickoff_utc) }}</span>
+        </div>
+        <div class="teams-row">
+          <div class="team">
+            {% if team_flag_url(f.home_team) %}<img class="flag-img" src="{{ team_flag_url(f.home_team) }}" alt="{{ f.home_team }} flag" loading="lazy">{% else %}<span class="flag-emoji">{{ team_flag(f.home_team) }}</span>{% endif %}
+            <strong>{{ f.home_team }}</strong>
+          </div>
+          <div class="versus">
+            {% if f.home_score is not none and f.away_score is not none %}
+              {{ f.home_score }} - {{ f.away_score }}
+            {% else %}
+              v
+            {% endif %}
+          </div>
+          <div class="team right">
+            <strong>{{ f.away_team }}</strong>
+            {% if team_flag_url(f.away_team) %}<img class="flag-img" src="{{ team_flag_url(f.away_team) }}" alt="{{ f.away_team }} flag" loading="lazy">{% else %}<span class="flag-emoji">{{ team_flag(f.away_team) }}</span>{% endif %}
+          </div>
+        </div>
+        <div class="fixture-meta">
+          <span>{{ f.entry_count }} entries</span>
+          <span>{{ f.venue or 'Venue TBC' }}</span>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-card glass-panel">
+    <h3>No World Cup fixtures yet</h3>
+    <p>Open Admin and load the World Cup demo data.</p>
+    <a class="btn primary" href="{{ url_for('admin_login') }}">Go to admin</a>
+  </div>
+{% endif %}
+{% endblock %}

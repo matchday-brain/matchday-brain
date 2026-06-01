@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Game brain</p>
+    <h1>Admin dashboard</h1>
+  </div>
+  <a class="btn ghost" href="{{ url_for('admin_logout') }}">Logout</a>
+</section>
+
+<div class="admin-nav">
+  <a class="btn primary" href="{{ url_for('admin_fixtures') }}">Fixtures & results</a>
+  <a class="btn ghost" href="{{ url_for('admin_content') }}">Content engine</a>
+  <a class="btn ghost" href="{{ url_for('admin_posts') }}">X post planner</a>
+  <a class="btn ghost" href="{{ url_for('admin_export_entries') }}">Export entries CSV</a>
+  <a class="btn ghost" href="{{ url_for('index') }}">Mobile game</a>
+</div>
+
+<section class="panel demo-panel">
+  <div>
+    <p class="eyebrow">Live database</p>
+    <h2>World Cup schedule and backup tools</h2>
+    <p class="muted">Loads the clean 2026 fixture schedule and all countries only. No fake entries and no fake X posts. Use the CSV export regularly once live entries start arriving.</p>
+  </div>
+  <div class="hero-actions">
+    <form method="post" action="{{ url_for('admin_load_schedule') }}" onsubmit="return confirm('This reloads the clean fixture schedule and clears entries/posts. Only use before launch or when resetting test data.')">
+      <button class="btn primary" type="submit">Load clean schedule</button>
+    </form>
+    <a class="btn ghost" href="{{ url_for('admin_export_entries') }}">Export entries CSV</a>
+  </div>
+</section>
+
+<div class="stats-grid">
+  <div class="stat"><small>Fixtures</small><strong>{{ stats.fixtures }}</strong></div>
+  <div class="stat"><small>Entries</small><strong>{{ stats.entries }}</strong></div>
+  <div class="stat"><small>Countries</small><strong>{{ stats.clubs }}</strong></div>
+  <div class="stat"><small>Planned posts</small><strong>{{ stats.posts }}</strong></div>
+</div>
+
+<section class="panel">
+  <h2>Latest entries</h2>
+  {% for e in latest %}
+    <div class="leader-row">
+      <div>
+        <strong>{{ e.player_name }}</strong>
+        <small>{{ e.home_team }} {{ e.pred_home_goals }}-{{ e.pred_away_goals }} {{ e.away_team }} · first goal {{ e.first_goal_minute }}'</small>
+      </div>
+      <span>{% if e.club_supporting and team_flag_url(e.club_supporting) %}<img class="tiny-flag" src="{{ team_flag_url(e.club_supporting) }}" alt="">{% elif e.club_supporting %}{{ team_flag(e.club_supporting) }}{% else %}⚽{% endif %} {{ e.club_supporting or 'Neutral' }}</span>
+    </div>
+  {% else %}
+    <p>No entries yet.</p>
+  {% endfor %}
+</section>
+{% endblock %}

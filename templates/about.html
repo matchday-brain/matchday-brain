@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero-card compact-page">
+  <span class="tag tag-gold">About</span>
+  <h1>About Matchday Brain</h1>
+  <p>Matchday Brain is a free football prediction game for fans who want something quick, competitive and shareable before kick-off.</p>
+</section>
+
+<section class="glass-panel content-page">
+  <h2>How it works</h2>
+  <p>Choose a fixture, predict the score and add the first-goal minute as your tie-breaker. Predictions close shortly before kick-off, then results are entered after the match and the leaderboard updates.</p>
+  <h2>Built for country pride</h2>
+  <p>For the 2026 edition, fans can play for their country and follow the live country leaderboard. After the tournament, Matchday Brain can expand into club football, league campaigns and special matchday games.</p>
+  <h2>Independent fan game</h2>
+  <p>Matchday Brain is not affiliated with, endorsed by, or connected to FIFA or any official tournament organiser. It is an independent fan prediction game.</p>
+  <a class="btn primary" href="{{ url_for('index') }}#fixtures">Play now</a>
+</section>
+{% endblock %}

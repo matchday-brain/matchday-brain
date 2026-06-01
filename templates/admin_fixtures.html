@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Admin</p>
+    <h1>World Cup fixtures & results</h1>
+  </div>
+  <a class="btn ghost" href="{{ url_for('admin_home') }}">Back</a>
+</section>
+
+<section class="panel">
+  <h2>Fixture source</h2>
+  <p class="muted">This World Cup build ships with fixtures stored locally, so there is no paid API needed. Use “Load World Cup data” on the admin home page to reset the fixture list and demo entries.</p>
+</section>
+
+<section class="form-card">
+  <h2>Add fixture manually</h2>
+  <form method="post" class="predict-form">
+    <input type="hidden" name="action" value="manual_add">
+    <label>Competition / group
+      <input name="league_name" value="World Cup 2026">
+    </label>
+    <label>Home team
+      <input name="home_team" placeholder="England" required>
+    </label>
+    <label>Away team
+      <input name="away_team" placeholder="Brazil" required>
+    </label>
+    <label>Kick-off UTC
+      <input name="kickoff_utc" placeholder="2026-06-17T20:00:00+00:00" required>
+    </label>
+    <label>Venue
+      <input name="venue" placeholder="Arlington, USA">
+    </label>
+    <button class="btn primary full" type="submit">Add fixture</button>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>Loaded fixtures</h2>
+  {% for f in fixtures %}
+    <div class="fixture-admin-row">
+      <div>
+        <strong>{% if team_flag_url(f.home_team) %}<img class="tiny-flag" src="{{ team_flag_url(f.home_team) }}" alt="">{% else %}{{ team_flag(f.home_team) }}{% endif %} {{ f.home_team }} v {{ f.away_team }} {% if team_flag_url(f.away_team) %}<img class="tiny-flag" src="{{ team_flag_url(f.away_team) }}" alt="">{% else %}{{ team_flag(f.away_team) }}{% endif %}</strong>
+        <small>{{ f.league_name }} · {{ format_kickoff(f.kickoff_utc) }} · {{ f.venue or 'Venue TBC' }} · {{ f.entry_count }} entries · {{ f.source }}</small>
+      </div>
+      <form method="post" class="result-form">
+        <input type="hidden" name="action" value="update_result">
+        <input type="hidden" name="fixture_id" value="{{ f.id }}">
+        <select name="status">
+          {% for s in ['scheduled','live','finished','postponed'] %}
+            <option {% if f.status == s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+        <input name="home_score" value="{{ f.home_score if f.home_score is not none else '' }}" placeholder="H" inputmode="numeric">
+        <input name="away_score" value="{{ f.away_score if f.away_score is not none else '' }}" placeholder="A" inputmode="numeric">
+        <input name="actual_first_goal_minute" value="{{ f.actual_first_goal_minute if f.actual_first_goal_minute is not none else '' }}" placeholder="1st goal" inputmode="numeric">
+        <button class="btn ghost small" type="submit">Save</button>
+      </form>
+    </div>
+  {% else %}
+    <p>No fixtures loaded.</p>
+  {% endfor %}
+</section>
+{% endblock %}

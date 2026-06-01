@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="content-hero">
+  <div>
+    <p class="eyebrow">World Cup content engine</p>
+    <h1>Fresh X posts from live game data</h1>
+    <p class="muted-light">Copy, tweak and post. These are generated from fixtures, predictions, country support, popular scores, fan mood and the latest calls.</p>
+  </div>
+  <div class="content-hero-stats">
+    <strong>{{ total }}</strong>
+    <span>ready-to-post ideas</span>
+  </div>
+</section>
+
+<div class="content-safety-note">
+  <strong>Player mentions are manual and opt-in.</strong> These ideas only use handles submitted by players. Keep it to a few mentions per post and avoid repeatedly tagging the same account.
+</div>
+
+<div class="content-toolbar">
+  <a class="btn ghost" href="{{ url_for('admin_home') }}">Back to admin</a>
+  <a class="btn ghost" href="{{ url_for('admin_posts') }}">Post planner</a>
+  <a class="btn primary" href="{{ url_for('admin_post_new') }}">Write custom post</a>
+</div>
+
+<div class="content-tabs">
+  <a href="#live_today">Live today</a>
+  <a href="#yesterday">Yesterday</a>
+  <a href="#tomorrow">Tomorrow</a>
+  <a href="#we_predict">We predict</a>
+  <a href="#country_race">Country race</a>
+  <a href="#player_mentions">Player mentions</a>
+  <a href="#match_angles">Match angles</a>
+  <a href="#global_hooks">Global hooks</a>
+</div>
+
+{% set labels = {
+  'live_today': 'Live today / opening buzz',
+  'yesterday': 'What happened yesterday',
+  'tomorrow': 'What to look forward to',
+  'we_predict': 'We predict',
+  'country_race': 'Worldwide country race',
+  'player_mentions': 'Opt-in player mention posts',
+  'match_angles': 'Data-led match angles',
+  'global_hooks': 'Global hooks'
+} %}
+
+{% for key, items in sections.items() %}
+<section class="content-section" id="{{ key }}">
+  <div class="section-head content-section-head">
+    <div>
+      <p class="eyebrow">{{ labels.get(key, key.replace('_', ' ')) }}</p>
+      <h2>{{ labels.get(key, key.replace('_', ' ')) }}</h2>
+    </div>
+    <span class="pill">{{ items|length }} ideas</span>
+  </div>
+
+  <div class="content-grid">
+    {% for p in items %}
+      <article class="content-card">
+        <div class="content-card-head">
+          <div>
+            <strong>{{ p.title }}</strong>
+            <small>{{ p.section }}{% if p.tag %} · {{ p.tag }}{% endif %}</small>
+          </div>
+          <span class="content-badge">X</span>
+        </div>
+        <pre>{{ p.body }}</pre>
+        {% if p.image_note %}<p class="image-note">Image idea: {{ p.image_note }}</p>{% endif %}
+        <div class="content-actions">
+          <button class="btn primary small" data-copy="{{ p.body }}">Copy post</button>
+          <a class="btn ghost small" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text={{ p.body|urlencode }}">Open in X</a>
+          <form method="post" action="{{ url_for('admin_content_save') }}">
+            <input type="hidden" name="title" value="{{ p.title }}">
+            <input type="hidden" name="body" value="{{ p.body }}">
+            <input type="hidden" name="link_url" value="{{ p.link_url }}">
+            <input type="hidden" name="image_note" value="{{ p.image_note }}">
+            <button class="btn ghost small" type="submit">Save to planner</button>
+          </form>
+        </div>
+      </article>
+    {% else %}
+      <article class="content-card empty-content">
+        <strong>No ideas yet</strong>
+        <p>Load World Cup data or wait for more entries to come in.</p>
+      </article>
+    {% endfor %}
+  </div>
+</section>
+{% endfor %}
+{% endblock %}
