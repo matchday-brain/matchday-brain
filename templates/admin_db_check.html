@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Admin</p>
+    <h1>Database check</h1>
+  </div>
+  <a class="btn ghost" href="{{ url_for('admin_home') }}">Back</a>
+</section>
+
+<section class="panel">
+  <h2>Live database status</h2>
+  <p class="muted">Use this page to confirm whether the live app is reading from Postgres and how many real records are saved.</p>
+  <div class="stats-grid">
+    {% for label, value in stats.items() %}
+      <div class="stat"><small>{{ label }}</small><strong>{{ value }}</strong></div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

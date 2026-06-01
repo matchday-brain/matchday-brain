@@ -14,12 +14,11 @@
 {% endblock %}
 
 {% block content %}
-{% set total_entries = fixtures|sum(attribute='entry_count') %}
 {% set featured = fixtures[0] if fixtures else none %}
 <section class="hero-card premium-hero">
   <div class="hero-topline">
     <span class="tag tag-gold">World Cup 2026 test run</span>
-    <span class="live-pill"><span class="pulse"></span>{{ total_entries or 23481 }} predictions loaded</span>
+    <span class="live-pill"><span class="pulse"></span>{% if today_predictions %}{{ today_predictions }} predictions today{% elif total_predictions %}{{ total_predictions }} predictions loaded{% else %}First calls now open{% endif %}</span>
   </div>
   <h1>Pick the score.<br>Guess the first goal.<br><em>Play for your country.</em></h1>
   <p>Fast, friendly pre-match predictions built for X. Choose a fixture, lock your call, and climb the country leaderboard before kick-off.</p>
@@ -94,7 +93,7 @@
 {% else %}
   <div class="empty-card glass-panel">
     <h3>No World Cup fixtures yet</h3>
-    <p>Open Admin and load the World Cup demo data.</p>
+    <p>Open Admin and load the clean World Cup schedule.</p>
     <a class="btn primary" href="{{ url_for('admin_login') }}">Go to admin</a>
   </div>
 {% endif %}
