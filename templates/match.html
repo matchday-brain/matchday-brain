@@ -4,14 +4,13 @@
   <div class="hero-copy">
     <div class="hero-kicker">
       <span class="tag tag-gold">World Cup 2026</span>
-      <span class="live-pill"><span class="pulse"></span>{{ total_predictions + 23504 }} predictions today</span>
+      <span class="live-pill"><span class="pulse"></span>{% if total_predictions %}{{ total_predictions }} {{ 'prediction' if total_predictions == 1 else 'predictions' }} loaded{% else %}First calls now open{% endif %}</span>
     </div>
     <h1>Pick the score.<br>Guess the first goal.<br><em>Play for your country.</em></h1>
     <p>60 seconds before kick-off. Make your call, back your country and climb the live fan table.</p>
     <div class="hero-metric-row">
       <span><b>{{ fixture_entries }}</b><small>calls on this match</small></span>
-      <span><b>{{ country_rows|length or 48 }}</b><small>countries active</small></span>
-      <span><b>72</b><small>matches loaded</small></span>
+      <span><b>{{ country_rows|length }}</b><small>countries active</small></span>
     </div>
   </div>
   <aside class="hero-trophy-stage" aria-label="World Cup edition trophy visual">
