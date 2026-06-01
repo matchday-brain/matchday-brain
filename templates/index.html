@@ -1,100 +1,127 @@
-{% extends "base.html" %}
-{% block structured_data %}
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Matchday Brain",
-  "applicationCategory": "GameApplication",
-  "operatingSystem": "Web",
-  "description": {{ default_meta_description()|tojson }},
-  "url": {{ absolute_url(url_for('index'))|tojson }}
-}
-</script>
-{% endblock %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Matchday Brain Hero Preview</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-{% block content %}
-{% set featured = fixtures[0] if fixtures else none %}
-<section class="hero-card premium-hero">
-  <div class="hero-topline">
-    <span class="tag tag-gold">World Cup 2026 test run</span>
-    <span class="live-pill"><span class="pulse"></span>{% if today_predictions %}{{ today_predictions }} predictions today{% elif total_predictions %}{{ total_predictions }} predictions loaded{% else %}First calls now open{% endif %}</span>
-  </div>
-  <h1>Pick the score.<br>Guess the first goal.<br><em>Play for your country.</em></h1>
-  <p>Fast, friendly pre-match predictions built for X. Choose a fixture, lock your call, and climb the country leaderboard before kick-off.</p>
-  <p class="seo-intro">Matchday Brain is a free football prediction game for the 2026 global football tournament. Pick the correct score, guess the first goal minute and represent your country on the live fan leaderboard.</p>
-  <div class="hero-actions">
-    <a class="btn primary" href="#fixtures">Play now</a>
-    <a class="btn glass" href="{{ url_for('leaderboard') }}">View leaderboard</a>
-  </div>
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 8% 12%, rgba(76, 184, 255, .55), transparent 28%),
+        linear-gradient(135deg, #061431 0%, #1149d9 54%, #061431 100%);
+      color: #fff;
+    }
 
-  {% if featured %}
-  <a class="featured-match" href="{{ url_for('match', fixture_id=featured.id) }}">
-    <span class="ribbon">Featured opener</span>
-    <div class="featured-inner">
-      <div class="feature-team">
-        {% if team_flag_url(featured.home_team) %}<img class="flag-xl" src="{{ team_flag_url(featured.home_team) }}" alt="{{ featured.home_team }} flag">{% endif %}
-        <strong>{{ featured.home_team }}</strong>
-      </div>
-      <div class="feature-centre">
-        <span>{{ featured.league_name or 'Group stage' }}</span>
-        <b>VS</b>
-        <small>{{ format_kickoff(featured.kickoff_utc) }}</small>
-      </div>
-      <div class="feature-team right">
-        {% if team_flag_url(featured.away_team) %}<img class="flag-xl" src="{{ team_flag_url(featured.away_team) }}" alt="{{ featured.away_team }} flag">{% endif %}
-        <strong>{{ featured.away_team }}</strong>
-      </div>
-    </div>
-  </a>
-  {% endif %}
-</section>
+    body {
+      padding: 28px;
+    }
 
-<section class="section-head" id="fixtures">
-  <div>
-    <p class="eyebrow">Fixtures</p>
-    <h2>Choose a World Cup match</h2>
-  </div>
-  <span class="pill">{{ fixtures|length }} loaded</span>
-</section>
+    .page {
+      width: min(1500px, 100%);
+      margin: 0 auto;
+    }
 
-{% if fixtures %}
-  <div class="fixture-list premium-fixtures">
-    {% for f in fixtures %}
-      <a class="fixture-card" href="{{ url_for('match', fixture_id=f.id) }}">
-        <div class="league-line">
-          <span>{{ f.league_name or 'World Cup 2026' }}</span>
-          <span>{{ format_kickoff(f.kickoff_utc) }}</span>
-        </div>
-        <div class="teams-row">
-          <div class="team">
-            {% if team_flag_url(f.home_team) %}<img class="flag-img" src="{{ team_flag_url(f.home_team) }}" alt="{{ f.home_team }} flag" loading="lazy">{% else %}<span class="flag-emoji">{{ team_flag(f.home_team) }}</span>{% endif %}
-            <strong>{{ f.home_team }}</strong>
-          </div>
-          <div class="versus">
-            {% if f.home_score is not none and f.away_score is not none %}
-              {{ f.home_score }} - {{ f.away_score }}
-            {% else %}
-              v
-            {% endif %}
-          </div>
-          <div class="team right">
-            <strong>{{ f.away_team }}</strong>
-            {% if team_flag_url(f.away_team) %}<img class="flag-img" src="{{ team_flag_url(f.away_team) }}" alt="{{ f.away_team }} flag" loading="lazy">{% else %}<span class="flag-emoji">{{ team_flag(f.away_team) }}</span>{% endif %}
-          </div>
-        </div>
-        <div class="fixture-meta">
-          <span>{{ f.entry_count }} entries</span>
-          <span>{{ f.venue or 'Venue TBC' }}</span>
-        </div>
-      </a>
-    {% endfor %}
-  </div>
-{% else %}
-  <div class="empty-card glass-panel">
-    <h3>No World Cup fixtures yet</h3>
-    <p>Open Admin and load the clean World Cup schedule.</p>
-    <a class="btn primary" href="{{ url_for('admin_login') }}">Go to admin</a>
-  </div>
-{% endif %}
-{% endblock %}
+    .hero-card {
+      position: relative;
+      width: 100%;
+      border-radius: 30px;
+      overflow: hidden;
+      box-shadow:
+        0 30px 90px rgba(0, 0, 0, .38),
+        inset 0 1px 0 rgba(255,255,255,.18);
+      border: 1px solid rgba(150, 190, 255, .34);
+      background: #071735;
+    }
+
+    .hero-card img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    /*
+      These invisible links sit over the visual buttons in the image.
+      They make the preview feel like the app while keeping the image exactly as designed.
+    */
+    .hero-link {
+      position: absolute;
+      display: block;
+      border-radius: 18px;
+      text-indent: -9999px;
+      overflow: hidden;
+    }
+
+    .hero-link:focus-visible {
+      outline: 3px solid #fff;
+      outline-offset: 4px;
+    }
+
+    .play-link {
+      left: 5.8%;
+      bottom: 5.8%;
+      width: 15%;
+      height: 8.8%;
+    }
+
+    .leaderboard-link {
+      left: 23.2%;
+      bottom: 5.8%;
+      width: 19.5%;
+      height: 8.8%;
+    }
+
+    .note {
+      margin: 18px auto 0;
+      max-width: 980px;
+      color: rgba(255,255,255,.82);
+      font-size: 15px;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        padding: 0;
+        background: #0f45d3;
+      }
+
+      .hero-card {
+        border-radius: 0 0 28px 28px;
+        border-left: 0;
+        border-right: 0;
+      }
+
+      /*
+        On mobile this image remains a faithful version of the design,
+        but it will be smaller text than the live app form sections.
+        For the final app version, we use this as the hero artwork and keep fixtures/form below.
+      */
+      .note {
+        padding: 0 18px 22px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero-card" aria-label="Matchday Brain World Cup prediction game hero">
+      <img src="matchday-brain-hero-football.png" alt="Matchday Brain football prediction game hero: Pick the score. Guess the first goal. Play for your country.">
+      <a class="hero-link play-link" href="#fixtures">Play now</a>
+      <a class="hero-link leaderboard-link" href="/leaderboard">View leaderboard</a>
+    </section>
+
+    <p class="note">
+      This preview uses the exact football-style hero artwork. In the live app, place the image at
+      <strong>static/img/matchday-brain-hero-football.png</strong> and update the homepage hero to use it.
+    </p>
+  </main>
+</body>
+</html>
