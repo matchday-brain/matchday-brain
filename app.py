@@ -6,7 +6,7 @@ import csv
 import io
 import unicodedata
 from datetime import datetime, timezone, timedelta
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urlparse
 from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
@@ -661,10 +661,24 @@ def index():
         LIMIT 120
         """
     ).fetchall()
+    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
+    total_predictions = conn.execute("SELECT COUNT(*) FROM entries").fetchone()[0]
+    today_predictions = conn.execute("SELECT COUNT(*) FROM entries WHERE created_at >= ?", (today_start,)).fetchone()[0]
+    countries_active = conn.execute(
+        """
+        SELECT COUNT(*) FROM (
+            SELECT DISTINCT COALESCE(NULLIF(TRIM(club_supporting), ''), 'Neutral') AS country
+            FROM entries
+        ) x
+        """
+    ).fetchone()[0]
     conn.close()
     return render_template(
         "index.html",
         fixtures=fixtures,
+        total_predictions=total_predictions,
+        today_predictions=today_predictions,
+        countries_active=countries_active,
         title="Matchday Brain | World Cup 2026 Football Prediction Game",
         meta_description=default_meta_description(),
         canonical_url=absolute_url(url_for("index")),
@@ -984,6 +998,29 @@ def admin_home():
     ).fetchall()
     conn.close()
     return render_template("admin.html", stats=stats, latest=latest)
+
+
+@app.route("/admin/db-check")
+def admin_db_check():
+    admin_required()
+    conn = get_db()
+
+    def safe_count(table):
+        try:
+            return conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+        except Exception as exc:
+            return f"ERROR: {exc}"
+
+    stats = {
+        "Database mode": "Postgres" if USE_POSTGRES else "SQLite",
+        "Database host": urlparse(DATABASE_URL).hostname if USE_POSTGRES else DB_PATH,
+        "Fixtures": safe_count("fixtures"),
+        "Entries": safe_count("entries"),
+        "Countries": safe_count("clubs"),
+        "Planned posts": safe_count("posts"),
+    }
+    conn.close()
+    return render_template("admin_db_check.html", stats=stats)
 
 
 @app.route("/admin/fixtures", methods=["GET", "POST"])
@@ -1731,11 +1768,7 @@ def admin_load_schedule():
 @app.route("/admin/demo/seed", methods=["POST"])
 def admin_seed_demo():
     admin_required()
-    stats = seed_demo_data(clear=True)
-    flash(
-        f"World Cup demo loaded: {stats['fixtures']} fixtures, {stats['entries']} entries, {stats['clubs']} countries and {stats['posts']} posts.",
-        "ok",
-    )
+    flash("Demo entries are disabled in live mode. Use Load clean schedule if you need to reset before launch.", "error")
     return redirect(url_for("admin_home"))
 
 
