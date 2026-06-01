@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Matchday Brain Hero Preview</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 8% 12%, rgba(76, 184, 255, .55), transparent 28%),
+        linear-gradient(135deg, #061431 0%, #1149d9 54%, #061431 100%);
+      color: #fff;
+    }
+
+    body {
+      padding: 28px;
+    }
+
+    .page {
+      width: min(1500px, 100%);
+      margin: 0 auto;
+    }
+
+    .hero-card {
+      position: relative;
+      width: 100%;
+      border-radius: 30px;
+      overflow: hidden;
+      box-shadow:
+        0 30px 90px rgba(0, 0, 0, .38),
+        inset 0 1px 0 rgba(255,255,255,.18);
+      border: 1px solid rgba(150, 190, 255, .34);
+      background: #071735;
+    }
+
+    .hero-card img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    /*
+      These invisible links sit over the visual buttons in the image.
+      They make the preview feel like the app while keeping the image exactly as designed.
+    */
+    .hero-link {
+      position: absolute;
+      display: block;
+      border-radius: 18px;
+      text-indent: -9999px;
+      overflow: hidden;
+    }
+
+    .hero-link:focus-visible {
+      outline: 3px solid #fff;
+      outline-offset: 4px;
+    }
+
+    .play-link {
+      left: 5.8%;
+      bottom: 5.8%;
+      width: 15%;
+      height: 8.8%;
+    }
+
+    .leaderboard-link {
+      left: 23.2%;
+      bottom: 5.8%;
+      width: 19.5%;
+      height: 8.8%;
+    }
+
+    .note {
+      margin: 18px auto 0;
+      max-width: 980px;
+      color: rgba(255,255,255,.82);
+      font-size: 15px;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        padding: 0;
+        background: #0f45d3;
+      }
+
+      .hero-card {
+        border-radius: 0 0 28px 28px;
+        border-left: 0;
+        border-right: 0;
+      }
+
+      /*
+        On mobile this image remains a faithful version of the design,
+        but it will be smaller text than the live app form sections.
+        For the final app version, we use this as the hero artwork and keep fixtures/form below.
+      */
+      .note {
+        padding: 0 18px 22px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero-card" aria-label="Matchday Brain World Cup prediction game hero">
+      <img src="matchday-brain-hero-football.png" alt="Matchday Brain football prediction game hero: Pick the score. Guess the first goal. Play for your country.">
+      <a class="hero-link play-link" href="#fixtures">Play now</a>
+      <a class="hero-link leaderboard-link" href="/leaderboard">View leaderboard</a>
+    </section>
+
+    <p class="note">
+      This preview uses the exact football-style hero artwork. In the live app, place the image at
+      <strong>static/img/matchday-brain-hero-football.png</strong> and update the homepage hero to use it.
+    </p>
+  </main>
+</body>
+</html>
