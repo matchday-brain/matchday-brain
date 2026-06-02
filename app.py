@@ -5,14 +5,21 @@ import random
 import csv
 import io
 import unicodedata
+import io
+import textwrap
 from datetime import datetime, timezone, timedelta
-from urllib.parse import quote_plus, urlparse
+from urllib.parse import quote_plus
 from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
 from flask import (
     Flask, abort, flash, has_request_context, redirect, render_template, request, session, url_for, Response
 )
+
+try:
+    from PIL import Image, ImageDraw, ImageFont
+except Exception:  # Pillow is installed from requirements in production.
+    Image = ImageDraw = ImageFont = None
 
 load_dotenv()
 
@@ -661,28 +668,14 @@ def index():
         LIMIT 120
         """
     ).fetchall()
-    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
-    total_predictions = conn.execute("SELECT COUNT(*) FROM entries").fetchone()[0]
-    today_predictions = conn.execute("SELECT COUNT(*) FROM entries WHERE created_at >= ?", (today_start,)).fetchone()[0]
-    countries_active = conn.execute(
-        """
-        SELECT COUNT(*) FROM (
-            SELECT DISTINCT COALESCE(NULLIF(TRIM(club_supporting), ''), 'Neutral') AS country
-            FROM entries
-        ) x
-        """
-    ).fetchone()[0]
     conn.close()
     return render_template(
         "index.html",
         fixtures=fixtures,
-        total_predictions=total_predictions,
-        today_predictions=today_predictions,
-        countries_active=countries_active,
         title="Matchday Brain | World Cup 2026 Football Prediction Game",
         meta_description=default_meta_description(),
         canonical_url=absolute_url(url_for("index")),
-        og_image=absolute_url(url_for("static", filename="img/og-matchday-brain.svg")),
+        og_image=absolute_url(url_for("og_home_image")),
     )
 
 
@@ -797,7 +790,7 @@ def match(fixture_id):
             "Pick the score, guess the first goal and back your country before kick-off."
         ),
         canonical_url=absolute_url(url_for("match", fixture_id=fixture_id)),
-        og_image=absolute_url(url_for("static", filename="img/og-matchday-brain.svg")),
+        og_image=absolute_url(url_for("og_match_image", fixture_id=fixture_id)),
     )
 
 
@@ -823,6 +816,7 @@ def thanks(entry_id):
         f"{row['away_team']} on Matchday Brain. First goal tie-breaker: {row['first_goal_minute']}' minute. "
         f"Think you know better? {match_url}"
     )
+    text = add_x_hashtags(text, row['home_team'], row['away_team'], row.get('club_supporting'))
     share_url = f"https://twitter.com/intent/tweet?text={quote_plus(text)}"
     return render_template(
         "thanks.html",
@@ -885,7 +879,7 @@ def leaderboard():
         title="Country Leaderboard | Matchday Brain",
         meta_description="See the Matchday Brain country leaderboard and the latest football prediction standings for the 2026 global tournament.",
         canonical_url=absolute_url(url_for("leaderboard")),
-        og_image=absolute_url(url_for("static", filename="img/og-matchday-brain.svg")),
+        og_image=absolute_url(url_for("og_home_image")),
     )
 
 
@@ -896,7 +890,7 @@ def about():
         title="About Matchday Brain | Football Prediction Game",
         meta_description="Matchday Brain is a fan-made football prediction game where supporters pick scores, guess first-goal minutes and compete on country leaderboards.",
         canonical_url=absolute_url(url_for("about")),
-        og_image=absolute_url(url_for("static", filename="img/og-matchday-brain.svg")),
+        og_image=absolute_url(url_for("og_home_image")),
     )
 
 
@@ -1000,29 +994,6 @@ def admin_home():
     return render_template("admin.html", stats=stats, latest=latest)
 
 
-@app.route("/admin/db-check")
-def admin_db_check():
-    admin_required()
-    conn = get_db()
-
-    def safe_count(table):
-        try:
-            return conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
-        except Exception as exc:
-            return f"ERROR: {exc}"
-
-    stats = {
-        "Database mode": "Postgres" if USE_POSTGRES else "SQLite",
-        "Database host": urlparse(DATABASE_URL).hostname if USE_POSTGRES else DB_PATH,
-        "Fixtures": safe_count("fixtures"),
-        "Entries": safe_count("entries"),
-        "Countries": safe_count("clubs"),
-        "Planned posts": safe_count("posts"),
-    }
-    conn.close()
-    return render_template("admin_db_check.html", stats=stats)
-
-
 @app.route("/admin/fixtures", methods=["GET", "POST"])
 def admin_fixtures():
     admin_required()
@@ -1119,7 +1090,98 @@ def x_mention(value):
     return f"@{handle}" if handle else ""
 
 
-def make_post(title, section, body, link_url="", image_note="", tag=""):
+GLOBAL_X_HASHTAGS = ["#FIFAWorldCup", "#FIFAWC", "#WorldCup2026", "#MatchdayBrain"]
+
+COUNTRY_X_HASHTAGS = {
+    "England": ["#ThreeLions", "#ENG"],
+    "Scotland": ["#NoScotlandNoParty", "#SCO"],
+    "Wales": ["#TogetherStronger", "#WAL"],
+    "United States": ["#USMNT", "#USA"],
+    "Mexico": ["#ElTri", "#MEX"],
+    "Canada": ["#CanMNT", "#CAN"],
+    "Brazil": ["#Selecao", "#BRA"],
+    "Argentina": ["#VamosArgentina", "#ARG"],
+    "France": ["#LesBleus", "#FRA"],
+    "Germany": ["#DieMannschaft", "#GER"],
+    "Spain": ["#LaRoja", "#ESP"],
+    "Portugal": ["#Portugal", "#POR"],
+    "Netherlands": ["#Oranje", "#NED"],
+    "Belgium": ["#RedDevils", "#BEL"],
+    "Croatia": ["#Vatreni", "#CRO"],
+    "Uruguay": ["#LaCeleste", "#URU"],
+    "Colombia": ["#VamosColombia", "#COL"],
+    "Japan": ["#SamuraiBlue", "#JPN"],
+    "South Korea": ["#KoreaRepublic", "#KOR"],
+    "Australia": ["#Socceroos", "#AUS"],
+    "New Zealand": ["#AllWhites", "#NZL"],
+    "Morocco": ["#AtlasLions", "#MAR"],
+    "Senegal": ["#LionsOfTeranga", "#SEN"],
+    "Ghana": ["#BlackStars", "#GHA"],
+    "South Africa": ["#BafanaBafana", "#RSA"],
+    "Egypt": ["#ThePharaohs", "#EGY"],
+    "Tunisia": ["#EaglesOfCarthage", "#TUN"],
+    "Algeria": ["#LesFennecs", "#ALG"],
+    "Ivory Coast": ["#LesElephants", "#CIV"],
+    "Turkey": ["#BizimCocuklar", "#TUR"],
+    "Iran": ["#TeamMelli", "#IRN"],
+    "Saudi Arabia": ["#GreenFalcons", "#KSA"],
+    "Qatar": ["#AlAnnabi", "#QAT"],
+    "Switzerland": ["#Nati", "#SUI"],
+    "Czech Republic": ["#Czechia", "#CZE"],
+    "Norway": ["#Norway", "#NOR"],
+    "Sweden": ["#Sverige", "#SWE"],
+    "Austria": ["#DasTeam", "#AUT"],
+    "Paraguay": ["#Albirroja", "#PAR"],
+    "Ecuador": ["#LaTri", "#ECU"],
+    "Panama": ["#LosCanaleros", "#PAN"],
+    "Haiti": ["#LesGrenadiers", "#HAI"],
+    "Bosnia & Herzegovina": ["#Zmajevi", "#BIH"],
+    "DR Congo": ["#Leopards", "#COD"],
+    "Congo DR": ["#Leopards", "#COD"],
+    "Uzbekistan": ["#WhiteWolves", "#UZB"],
+    "Jordan": ["#Nashama", "#JOR"],
+    "Iraq": ["#LionsOfMesopotamia", "#IRQ"],
+    "Cape Verde": ["#BlueSharks", "#CPV"],
+    "Curacao": ["#Curacao", "#CUW"],
+    "Curaçao": ["#Curacao", "#CUW"],
+}
+
+
+def x_hashtags_for_teams(*teams, extra=None, max_country_tags=4):
+    """Return a clean hashtag footer for X posts.
+
+    We keep the global tags on almost every generated post and then add a small
+    number of team/country-specific tags so the post reaches the right fan base
+    without looking spammy.
+    """
+    tags = []
+    for tag in GLOBAL_X_HASHTAGS:
+        if tag not in tags:
+            tags.append(tag)
+    for team in teams:
+        for tag in COUNTRY_X_HASHTAGS.get(str(team or '').strip(), []):
+            if tag not in tags and len([t for t in tags if t not in GLOBAL_X_HASHTAGS]) < max_country_tags:
+                tags.append(tag)
+    for tag in extra or []:
+        if tag and tag not in tags:
+            tags.append(tag)
+    return " ".join(tags)
+
+
+def add_x_hashtags(body, *teams, extra=None):
+    body = (body or '').strip()
+    footer = x_hashtags_for_teams(*teams, extra=extra)
+    if not footer:
+        return body
+    existing = {part for part in body.split() if part.startswith('#')}
+    new_tags = [tag for tag in footer.split() if tag not in existing]
+    if not new_tags:
+        return body
+    return body + "\n\n" + " ".join(new_tags)
+
+
+def make_post(title, section, body, link_url="", image_note="", tag="", teams=None, extra_hashtags=None):
+    body = add_x_hashtags(body, *(teams or []), extra=extra_hashtags)
     return {
         "title": title,
         "section": section,
@@ -1487,8 +1549,164 @@ def build_content_engine():
                 "fan backing",
             ))
 
+    # Final hashtag pass: ensure every generated post has global tags and
+    # add country tags where team/country names appear in the copy.
+    known_teams = list(COUNTRY_X_HASHTAGS.keys())
+    for items in sections.values():
+        for post in items:
+            matched = [team for team in known_teams if team and team in post.get("body", "")]
+            post["body"] = add_x_hashtags(post.get("body", ""), *matched[:4])
+
     conn.close()
     return sections
+
+
+
+def _font(size=44, bold=False):
+    if ImageFont is None:
+        return None
+    candidates = [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf",
+    ]
+    for path in candidates:
+        try:
+            return ImageFont.truetype(path, size)
+        except Exception:
+            pass
+    return ImageFont.load_default()
+
+
+def _wrap(draw, text, font, max_width):
+    lines = []
+    for paragraph in str(text or '').split('\n'):
+        words = paragraph.split()
+        if not words:
+            lines.append('')
+            continue
+        line = ''
+        for word in words:
+            test = (line + ' ' + word).strip()
+            bbox = draw.textbbox((0, 0), test, font=font)
+            if bbox[2] - bbox[0] <= max_width or not line:
+                line = test
+            else:
+                lines.append(line)
+                line = word
+        if line:
+            lines.append(line)
+    return lines
+
+
+def generate_social_card(title, subtitle='', kicker='MATCHDAY BRAIN', matchup=''):
+    """Generate a 1600x900 PNG for X/link cards and admin post images."""
+    if Image is None:
+        return None
+
+    W, H = 1600, 900
+    img = Image.new('RGB', (W, H), '#061437')
+    draw = ImageDraw.Draw(img)
+
+    # Blue gradient background
+    for y in range(H):
+        shade = int(16 + (y / H) * 28)
+        draw.line((0, y, W, y), fill=(4, 18 + shade // 2, 58 + shade))
+    # Stadium glow and pitch sweep
+    draw.ellipse((930, 100, 1780, 950), fill=(14, 77, 190))
+    draw.ellipse((980, 180, 1700, 850), fill=(5, 26, 79))
+    for x in range(-150, 1650, 110):
+        draw.line((x, 0, x + 380, H), fill=(34, 80, 170), width=2)
+    draw.arc((-130, 555, 1840, 1180), 196, 346, fill=(255, 203, 62), width=8)
+    draw.arc((-80, 600, 1750, 1160), 200, 342, fill=(45, 178, 238), width=3)
+
+    # Brand marker
+    gold = (255, 207, 74)
+    white = (255, 255, 255)
+    muted = (206, 219, 248)
+    draw.rounded_rectangle((92, 72, 430, 145), radius=24, fill=(255, 207, 74), outline=(255, 234, 160), width=2)
+    draw.text((126, 92), '⚽ MATCHDAY BRAIN', fill=(8, 18, 41), font=_font(30, True))
+
+    if matchup:
+        draw.rounded_rectangle((92, 172, 520, 228), radius=20, fill=(255, 255, 255,))
+        draw.text((122, 185), matchup[:32], fill=(8, 18, 41), font=_font(24, True))
+
+    # Copy
+    title_font = _font(82, True)
+    sub_font = _font(36, False)
+    y = 300
+    for line in _wrap(draw, title, title_font, 930)[:4]:
+        draw.text((92, y), line, fill=white if 'country' not in line.lower() else gold, font=title_font)
+        y += 94
+    y += 18
+    for line in _wrap(draw, subtitle, sub_font, 880)[:4]:
+        draw.text((96, y), line, fill=muted, font=sub_font)
+        y += 48
+
+    # Trophy/ball-style circular mark on the right
+    cx, cy, r = 1215, 500, 210
+    draw.ellipse((cx-r, cy-r, cx+r, cy+r), fill=(10, 29, 82), outline=(255, 207, 74), width=8)
+    draw.polygon([(cx, cy-r+40), (cx+60, cy-40), (cx+30, cy+130), (cx-30, cy+130), (cx-60, cy-40)], fill=gold)
+    draw.ellipse((cx-95, cy-r+15, cx+95, cy-r+205), fill=gold, outline=(255, 235, 150), width=4)
+    draw.text((cx-100, cy+165), 'WORLD CUP\n2026', fill=white, font=_font(34, True), align='center')
+
+    # CTA strip
+    draw.rounded_rectangle((92, 760, 760, 835), radius=24, fill=gold)
+    draw.text((130, 780), 'Pick the score. Guess the first goal.', fill=(8, 18, 41), font=_font(32, True))
+    return img
+
+
+@app.route('/og/home.png')
+def og_home_image():
+    img = generate_social_card(
+        'Pick the score. Guess the first goal. Play for your country.',
+        'Free football prediction game for World Cup 2026 fans. Make your call before kick-off.',
+        'MATCHDAY BRAIN',
+        'World Cup 2026',
+    )
+    if img is None:
+        abort(503)
+    buf = io.BytesIO()
+    img.save(buf, format='PNG', optimize=True)
+    buf.seek(0)
+    return Response(buf.getvalue(), mimetype='image/png')
+
+
+@app.route('/og/match/<int:fixture_id>.png')
+def og_match_image(fixture_id):
+    conn = get_db()
+    f = conn.execute('SELECT * FROM fixtures WHERE id=?', (fixture_id,)).fetchone()
+    entries = conn.execute('SELECT COUNT(*) FROM entries WHERE fixture_id=?', (fixture_id,)).fetchone()[0] if f else 0
+    conn.close()
+    if not f:
+        abort(404)
+    title = f"{f['home_team']} v {f['away_team']}"
+    subtitle = f"{entries} fan calls in. Pick your score and first-goal minute before kick-off."
+    img = generate_social_card(title, subtitle, 'MATCHDAY BRAIN', 'World Cup 2026')
+    if img is None:
+        abort(503)
+    buf = io.BytesIO()
+    img.save(buf, format='PNG', optimize=True)
+    buf.seek(0)
+    return Response(buf.getvalue(), mimetype='image/png')
+
+
+@app.route('/admin/posts/<int:post_id>/image.png')
+def admin_post_image(post_id):
+    admin_required()
+    conn = get_db()
+    post = conn.execute('SELECT * FROM posts WHERE id=?', (post_id,)).fetchone()
+    conn.close()
+    if not post:
+        abort(404)
+    body = str(post['body'] or '')
+    clean = ' '.join([part for part in body.replace('\n', ' ').split() if not part.startswith('http') and not part.startswith('#')])
+    img = generate_social_card(post['title'], clean[:180], 'MATCHDAY BRAIN', 'X post image')
+    if img is None:
+        abort(503)
+    buf = io.BytesIO()
+    img.save(buf, format='PNG', optimize=True)
+    buf.seek(0)
+    return Response(buf.getvalue(), mimetype='image/png', headers={'Content-Disposition': f'inline; filename=matchday-post-{post_id}.png'})
 
 
 @app.route("/admin/posts", methods=["GET", "POST"])
@@ -1597,6 +1815,7 @@ def admin_post_suggest():
         f"Pick your score and first-goal minute tie-breaker before kick-off.\n\n"
         f"Play here: {public_base_url()}{url_for('match', fixture_id=fixture['id'])}"
     )
+    body = add_x_hashtags(body, fixture["home_team"], fixture["away_team"])
     conn.execute(
         """
         INSERT INTO posts (title, body, scheduled_at, status, link_url, image_note, created_at)
@@ -1768,7 +1987,11 @@ def admin_load_schedule():
 @app.route("/admin/demo/seed", methods=["POST"])
 def admin_seed_demo():
     admin_required()
-    flash("Demo entries are disabled in live mode. Use Load clean schedule if you need to reset before launch.", "error")
+    stats = seed_demo_data(clear=True)
+    flash(
+        f"World Cup demo loaded: {stats['fixtures']} fixtures, {stats['entries']} entries, {stats['clubs']} countries and {stats['posts']} posts.",
+        "ok",
+    )
     return redirect(url_for("admin_home"))
 
 
