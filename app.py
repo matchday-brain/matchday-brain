@@ -2,6 +2,7 @@ import os
 import sqlite3
 import hashlib
 import random
+import re
 import csv
 import io
 import unicodedata
@@ -1608,6 +1609,7 @@ def _team_colours(team):
         "England": ((255, 255, 255), (196, 18, 48)),
         "Croatia": ((23, 76, 154), (196, 18, 48)),
         "United States": ((60, 59, 110), (178, 34, 52)),
+        "Paraguay": ((0, 56, 97), (213, 43, 30)),
         "Brazil": ((0, 156, 59), (255, 223, 0)),
         "Argentina": ((116, 172, 223), (255, 255, 255)),
         "France": ((0, 35, 149), (237, 41, 57)),
@@ -1623,69 +1625,105 @@ def _team_colours(team):
         "Morocco": ((193, 39, 45), (0, 98, 51)),
         "Ghana": ((239, 51, 64), (252, 209, 22)),
         "Uruguay": ((255, 255, 255), (0, 56, 168)),
+        "Qatar": ((140, 24, 57), (255, 255, 255)),
+        "Switzerland": ((218, 41, 28), (255, 255, 255)),
+        "Turkey": ((227, 10, 23), (255, 255, 255)),
+        "Japan": ((255, 255, 255), (188, 0, 45)),
+        "Sweden": ((0, 106, 167), (254, 204, 0)),
+        "Tunisia": ((231, 0, 19), (255, 255, 255)),
+        "Egypt": ((206, 17, 38), (0, 0, 0)),
+        "New Zealand": ((0, 34, 68), (204, 20, 43)),
+        "Saudi Arabia": ((0, 108, 53), (255, 255, 255)),
+        "Senegal": ((0, 133, 63), (227, 27, 35)),
+        "Norway": ((186, 12, 47), (0, 32, 91)),
+        "Algeria": ((0, 98, 51), (255, 255, 255)),
+        "Austria": ((237, 41, 57), (255, 255, 255)),
+        "Colombia": ((252, 209, 22), (0, 56, 147)),
     }
     return colours.get(str(team or "").strip(), ((18, 73, 190), (255, 207, 74)))
 
 
-def _draw_social_flag(draw, box, team):
-    x1, y1, x2, y2 = box
-    c1, c2 = _team_colours(team)
-    w = x2 - x1
-    h = y2 - y1
-    draw.rounded_rectangle(box, radius=24, fill=(235, 241, 255), outline=(255, 207, 74), width=5)
-
-    t = str(team or "")
-    if t in ("Mexico", "France", "Belgium", "Italy", "Canada"):
-        third = w // 3
-        draw.rectangle((x1, y1, x1 + third, y2), fill=c1)
-        draw.rectangle((x1 + third, y1, x1 + 2 * third, y2), fill=(245, 247, 255))
-        draw.rectangle((x1 + 2 * third, y1, x2, y2), fill=c2)
-        if t == "Mexico":
-            draw.ellipse((x1 + w//2 - 26, y1 + h//2 - 26, x1 + w//2 + 26, y1 + h//2 + 26), fill=(154, 105, 45), outline=(0,80,50), width=4)
-    elif t in ("South Africa",):
-        draw.rectangle((x1, y1, x2, y1 + h//2), fill=(222, 56, 49))
-        draw.rectangle((x1, y1 + h//2, x2, y2), fill=(0, 35, 149))
-        draw.polygon([(x1, y1), (x1 + w*0.52, y1 + h//2), (x1, y2)], fill=(0, 119, 73))
-        draw.polygon([(x1, y1+12), (x1 + w*0.42, y1 + h//2), (x1, y2-12)], fill=(255, 184, 28))
-        draw.polygon([(x1, y1+28), (x1 + w*0.30, y1 + h//2), (x1, y2-28)], fill=(0, 0, 0))
-    elif t in ("Czech Republic",):
-        draw.rectangle((x1, y1, x2, y1 + h//2), fill=(255,255,255))
-        draw.rectangle((x1, y1 + h//2, x2, y2), fill=(214, 20, 32))
-        draw.polygon([(x1, y1), (x1 + w*0.48, y1+h//2), (x1, y2)], fill=(17, 69, 126))
-    elif t in ("South Korea",):
-        draw.rectangle((x1, y1, x2, y2), fill=(255,255,255))
-        draw.pieslice((x1+w//2-42, y1+h//2-42, x1+w//2+42, y1+h//2+42), 90, 270, fill=(205, 46, 58))
-        draw.pieslice((x1+w//2-42, y1+h//2-42, x1+w//2+42, y1+h//2+42), 270, 90, fill=(0, 71, 160))
-        for dx, dy in [(-80,-45),(70,-45),(-80,45),(70,45)]:
-            draw.rectangle((x1+w//2+dx, y1+h//2+dy, x1+w//2+dx+42, y1+h//2+dy+8), fill=(0,0,0))
-            draw.rectangle((x1+w//2+dx, y1+h//2+dy+16, x1+w//2+dx+42, y1+h//2+dy+24), fill=(0,0,0))
-    elif t in ("Brazil",):
-        draw.rectangle((x1, y1, x2, y2), fill=(0, 156, 59))
-        draw.polygon([(x1+w//2,y1+18),(x2-26,y1+h//2),(x1+w//2,y2-18),(x1+26,y1+h//2)], fill=(255, 223, 0))
-        draw.ellipse((x1+w//2-45, y1+h//2-45, x1+w//2+45, y1+h//2+45), fill=(0, 39, 118))
-    elif t in ("Argentina",):
-        draw.rectangle((x1, y1, x2, y1 + h//3), fill=(116, 172, 223))
-        draw.rectangle((x1, y1 + h//3, x2, y1 + 2*h//3), fill=(255,255,255))
-        draw.rectangle((x1, y1 + 2*h//3, x2, y2), fill=(116, 172, 223))
-        draw.ellipse((x1+w//2-18,y1+h//2-18,x1+w//2+18,y1+h//2+18), fill=(255, 207, 74))
-    else:
-        draw.rectangle((x1, y1, x2, y1 + h//2), fill=c1)
-        draw.rectangle((x1, y1 + h//2, x2, y2), fill=c2)
-
-
-def _fit_text(draw, text, font_size, max_width, bold=True, min_size=32):
+def _fit_text(draw, text, font_size, max_width, bold=True, min_size=26):
     size = font_size
     while size >= min_size:
         font = _font(size, bold)
-        bbox = draw.textbbox((0, 0), str(text), font=font)
-        if bbox[2] - bbox[0] <= max_width:
+        box = draw.textbbox((0, 0), str(text), font=font)
+        if box[2] - box[0] <= max_width:
             return font
         size -= 2
     return _font(min_size, bold)
 
 
+def _draw_broadcast_flag(draw, box, team):
+    x1, y1, x2, y2 = [int(v) for v in box]
+    w, h = x2 - x1, y2 - y1
+    team = str(team or "")
+    c1, c2 = _team_colours(team)
+
+    # Gold-edged tilted/broadcast panel
+    draw.rounded_rectangle((x1-7, y1-7, x2+7, y2+7), radius=12, fill=(255, 207, 74))
+    draw.rounded_rectangle((x1, y1, x2, y2), radius=9, fill=(245, 247, 255))
+
+    if team in ("Mexico", "France", "Belgium", "Italy", "Canada"):
+        third = w // 3
+        draw.rectangle((x1, y1, x1 + third, y2), fill=c1)
+        draw.rectangle((x1 + third, y1, x1 + 2 * third, y2), fill=(246, 248, 255))
+        draw.rectangle((x1 + 2 * third, y1, x2, y2), fill=c2)
+        if team == "Mexico":
+            draw.ellipse((x1+w//2-22, y1+h//2-22, x1+w//2+22, y1+h//2+22), fill=(142, 90, 42), outline=(0, 100, 60), width=3)
+        if team == "Canada":
+            draw.polygon([(x1+w//2, y1+h//2-28), (x1+w//2+13, y1+h//2), (x1+w//2, y1+h//2+28), (x1+w//2-13, y1+h//2)], fill=(255,0,0))
+    elif team == "South Africa":
+        draw.rectangle((x1, y1, x2, y1 + h//2), fill=(222, 56, 49))
+        draw.rectangle((x1, y1 + h//2, x2, y2), fill=(0, 35, 149))
+        draw.polygon([(x1, y1), (x1 + int(w*.55), y1+h//2), (x1, y2)], fill=(0, 119, 73))
+        draw.polygon([(x1, y1+9), (x1 + int(w*.43), y1+h//2), (x1, y2-9)], fill=(255, 184, 28))
+        draw.polygon([(x1, y1+24), (x1 + int(w*.30), y1+h//2), (x1, y2-24)], fill=(0, 0, 0))
+    elif team == "Czech Republic":
+        draw.rectangle((x1, y1, x2, y1+h//2), fill=(255,255,255))
+        draw.rectangle((x1, y1+h//2, x2, y2), fill=(214, 20, 32))
+        draw.polygon([(x1, y1), (x1+int(w*.48), y1+h//2), (x1, y2)], fill=(17, 69, 126))
+    elif team == "South Korea":
+        draw.rectangle((x1, y1, x2, y2), fill=(255,255,255))
+        draw.pieslice((x1+w//2-36, y1+h//2-36, x1+w//2+36, y1+h//2+36), 90, 270, fill=(205, 46, 58))
+        draw.pieslice((x1+w//2-36, y1+h//2-36, x1+w//2+36, y1+h//2+36), 270, 90, fill=(0, 71, 160))
+        for dx, dy in [(-76,-44),(58,-44),(-76,40),(58,40)]:
+            draw.rectangle((x1+w//2+dx, y1+h//2+dy, x1+w//2+dx+42, y1+h//2+dy+7), fill=(0,0,0))
+            draw.rectangle((x1+w//2+dx, y1+h//2+dy+15, x1+w//2+dx+42, y1+h//2+dy+22), fill=(0,0,0))
+    elif team == "Brazil":
+        draw.rectangle((x1, y1, x2, y2), fill=(0, 156, 59))
+        draw.polygon([(x1+w//2,y1+16),(x2-24,y1+h//2),(x1+w//2,y2-16),(x1+24,y1+h//2)], fill=(255, 223, 0))
+        draw.ellipse((x1+w//2-38, y1+h//2-38, x1+w//2+38, y1+h//2+38), fill=(0, 39, 118))
+    elif team == "Argentina":
+        draw.rectangle((x1, y1, x2, y1+h//3), fill=(116,172,223))
+        draw.rectangle((x1, y1+h//3, x2, y1+2*h//3), fill=(255,255,255))
+        draw.rectangle((x1, y1+2*h//3, x2, y2), fill=(116,172,223))
+        draw.ellipse((x1+w//2-17,y1+h//2-17,x1+w//2+17,y1+h//2+17), fill=(255,207,74))
+    elif team == "Germany":
+        draw.rectangle((x1, y1, x2, y1+h//3), fill=(0,0,0))
+        draw.rectangle((x1, y1+h//3, x2, y1+2*h//3), fill=(221,0,0))
+        draw.rectangle((x1, y1+2*h//3, x2, y2), fill=(255,206,0))
+    elif team == "Spain":
+        draw.rectangle((x1, y1, x2, y1+h//4), fill=(198,11,30))
+        draw.rectangle((x1, y1+h//4, x2, y1+3*h//4), fill=(255,196,0))
+        draw.rectangle((x1, y1+3*h//4, x2, y2), fill=(198,11,30))
+    elif team == "England":
+        draw.rectangle((x1, y1, x2, y2), fill=(255,255,255))
+        draw.rectangle((x1+w//2-13, y1, x1+w//2+13, y2), fill=(196,18,48))
+        draw.rectangle((x1, y1+h//2-13, x2, y1+h//2+13), fill=(196,18,48))
+    elif team == "Scotland":
+        draw.rectangle((x1, y1, x2, y2), fill=(0,94,184))
+        draw.line((x1,y1,x2,y2), fill=(255,255,255), width=22)
+        draw.line((x1,y2,x2,y1), fill=(255,255,255), width=22)
+    else:
+        draw.rectangle((x1, y1, x2, y1+h//2), fill=c1)
+        draw.rectangle((x1, y1+h//2, x2, y2), fill=c2)
+
+    draw.rounded_rectangle((x1, y1, x2, y2), radius=9, outline=(255, 238, 170), width=2)
+
+
 def generate_match_social_card(fixture, entries=0):
-    """Generate a dynamic 1200x630 match card for X/social previews."""
+    """Generate a dynamic 1200x630 broadcast-poster style match card for X/social previews."""
     if Image is None:
         return None
 
@@ -1693,137 +1731,118 @@ def generate_match_social_card(fixture, entries=0):
     home = fixture["home_team"]
     away = fixture["away_team"]
     kickoff = format_kickoff(fixture["kickoff_utc"]) if fixture.get("kickoff_utc") else "Kick-off TBC"
-    c1a, c1b = _team_colours(home)
-    c2a, c2b = _team_colours(away)
 
-    img = Image.new("RGB", (W, H), (3, 13, 38))
+    img = Image.new("RGB", (W, H), (3, 12, 34))
     draw = ImageDraw.Draw(img)
 
-    # Dynamic blue stadium gradient
+    # Deep broadcast stadium gradient
     for y in range(H):
         t = y / H
-        col = (
-            int(3 + 9*t),
-            int(16 + 28*t),
-            int(58 + 62*t),
-        )
-        draw.line((0, y, W, y), fill=col)
+        draw.line((0, y, W, y), fill=(3, int(14 + 20*t), int(48 + 72*t)))
 
-    # Team colour glow panels
-    glow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    # Dynamic team glows
+    c1, _ = _team_colours(home)
+    c2, _ = _team_colours(away)
+    glow = Image.new("RGBA", (W, H), (0,0,0,0))
     gd = ImageDraw.Draw(glow)
-    gd.ellipse((-250, 40, 520, 700), fill=(c1a[0], c1a[1], c1a[2], 90))
-    gd.ellipse((700, 40, 1450, 700), fill=(c2a[0], c2a[1], c2a[2], 90))
-    gd.ellipse((345, 190, 855, 700), fill=(255, 207, 74, 42))
-    glow = glow.filter(ImageFilter.GaussianBlur(55))
+    gd.ellipse((-220, 80, 520, 600), fill=(c1[0], c1[1], c1[2], 92))
+    gd.ellipse((680, 80, 1420, 600), fill=(c2[0], c2[1], c2[2], 92))
+    gd.ellipse((350, 170, 850, 560), fill=(255, 207, 74, 42))
+    glow = glow.filter(ImageFilter.GaussianBlur(52))
     img = Image.alpha_composite(img.convert("RGBA"), glow).convert("RGB")
     draw = ImageDraw.Draw(img)
 
-    # Stadium floodlights and confetti
-    for x in (72, 1128):
-        for i in range(7):
-            draw.ellipse((x-55+i*18, 30+i%2*7, x-43+i*18, 42+i%2*7), fill=(215, 235, 255))
-        draw.line((x, 50, 600, 360), fill=(65, 140, 255), width=2)
-    for i in range(70):
-        x = (i * 137) % W
-        y = (i * 83) % H
-        colour = (255, 207, 74) if i % 3 == 0 else (32, 156, 255)
-        draw.rectangle((x, y, x+8, y+3), fill=colour)
-
-    # Brand
     gold = (255, 207, 74)
-    white = (255, 255, 255)
+    white = (255,255,255)
     muted = (205, 219, 248)
 
-    draw.rounded_rectangle((424, 26, 776, 86), radius=18, fill=(4, 14, 42), outline=(255, 207, 74), width=2)
-    draw.text((463, 38), "MATCHDAY BRAIN", font=_font(32, True), fill=white)
-    draw.rounded_rectangle((378, 98, 822, 142), radius=18, fill=(5, 20, 58), outline=gold, width=2)
-    draw.text((446, 108), "🏆 WORLD CUP 2026 TEST RUN", font=_font(24, True), fill=gold)
+    # Stadium lights and confetti
+    for x in (70, 1130):
+        for i in range(8):
+            draw.ellipse((x-65+i*17, 28+(i%2)*5, x-54+i*17, 39+(i%2)*5), fill=(230, 245, 255))
+        draw.line((x, 45, 600, 360), fill=(42, 128, 255), width=2)
+    for i in range(110):
+        x = (i * 149 + 37) % W
+        y = (i * 71 + 19) % H
+        col = gold if i % 3 == 0 else (38, 158, 255)
+        draw.rectangle((x, y, x+7, y+3), fill=col)
 
-    # Flag cards
-    left_flag = (80, 175, 455, 320)
-    right_flag = (745, 175, 1120, 320)
-    _draw_social_flag(draw, left_flag, home)
-    _draw_social_flag(draw, right_flag, away)
+    # Brand header, matching the style the user liked
+    draw.text((420, 25), "MATCHDAY", font=_font(42, True), fill=white)
+    draw.text((516, 70), "BRAIN", font=_font(42, True), fill=white)
+    draw.rounded_rectangle((360, 118, 840, 160), radius=13, fill=(5, 18, 52), outline=gold, width=2)
+    draw.text((440, 126), "🏆 WORLD CUP 2026 TEST RUN", font=_font(25, True), fill=gold)
 
-    # Nameplates
-    draw.rounded_rectangle((70, 314, 465, 385), radius=12, fill=(4, 15, 44), outline=gold, width=3)
-    draw.rounded_rectangle((735, 314, 1130, 385), radius=12, fill=(4, 15, 44), outline=gold, width=3)
-    home_font = _fit_text(draw, home.upper(), 44, 345, True, 26)
-    away_font = _fit_text(draw, away.upper(), 44, 345, True, 26)
+    # Match panels
+    _draw_broadcast_flag(draw, (95, 205, 455, 320), home)
+    _draw_broadcast_flag(draw, (745, 205, 1105, 320), away)
+
+    draw.rounded_rectangle((82, 320, 468, 374), radius=8, fill=(5,18,52), outline=gold, width=3)
+    draw.rounded_rectangle((732, 320, 1118, 374), radius=8, fill=(5,18,52), outline=gold, width=3)
+
+    home_font = _fit_text(draw, home.upper(), 40, 330, True, 25)
+    away_font = _fit_text(draw, away.upper(), 40, 330, True, 25)
     hb = draw.textbbox((0,0), home.upper(), font=home_font)
     ab = draw.textbbox((0,0), away.upper(), font=away_font)
-    draw.text((70 + (395-(hb[2]-hb[0]))/2, 330), home.upper(), font=home_font, fill=white)
-    draw.text((735 + (395-(ab[2]-ab[0]))/2, 330), away.upper(), font=away_font, fill=white)
+    draw.text((82 + (386-(hb[2]-hb[0]))/2, 330), home.upper(), font=home_font, fill=white)
+    draw.text((732 + (386-(ab[2]-ab[0]))/2, 330), away.upper(), font=away_font, fill=white)
 
-    # VS
-    draw.text((545, 218), "VS", font=_font(92, True), fill=gold)
-    draw.line((592, 188, 625, 347), fill=(255, 235, 160), width=3)
+    # Central VS
+    draw.text((531, 230), "VS", font=_font(86, True), fill=gold)
+    draw.line((585, 210, 623, 345), fill=(255, 238, 170), width=3)
 
     # Kickoff strip
-    draw.rounded_rectangle((250, 408, 950, 462), radius=16, fill=(6, 20, 58), outline=gold, width=2)
-    draw.text((294, 420), f"📅 {kickoff}", font=_font(27, True), fill=white)
-    draw.text((705, 420), f"🔥 {entries} fan call{'s' if int(entries) != 1 else ''}", font=_font(27, True), fill=gold)
+    draw.rounded_rectangle((260, 397, 940, 442), radius=10, fill=(6, 20, 58), outline=gold, width=2)
+    draw.text((300, 407), f"📅 {kickoff}", font=_font(23, True), fill=white)
+    draw.line((603, 404, 603, 436), fill=(255,255,255), width=1)
+    draw.text((640, 407), f"🔥 {entries} FAN CALL{'S' if int(entries) != 1 else ''}", font=_font(23, True), fill=gold)
 
-    # CTA text
-    draw.text((260, 492), "PREDICT THE SCORE.", font=_font(46, True), fill=white)
-    draw.text((268, 540), "GUESS THE FIRST GOAL.", font=_font(46, True), fill=gold)
-
-    # Bottom URL strip
-    draw.rounded_rectangle((170, 588, 1030, 624), radius=14, fill=(5, 18, 52), outline=gold, width=2)
-    draw.text((232, 593), "BACK YOUR COUNTRY AT MATCHDAYBRAIN.COM", font=_font(25, True), fill=white)
+    # Lower CTA, bold and broadcast-like
+    draw.text((366, 470), "PREDICT THE SCORE.", font=_font(44, True), fill=white)
+    draw.text((316, 520), "GUESS THE FIRST GOAL.", font=_font(48, True), fill=gold)
+    draw.rounded_rectangle((165, 578, 1035, 620), radius=12, fill=(5, 18, 52), outline=gold, width=2)
+    draw.text((250, 586), "🌐 BACK YOUR COUNTRY AT MATCHDAYBRAIN.COM", font=_font(27, True), fill=white)
 
     return img
 
 
 def generate_social_card(title, subtitle='', kicker='MATCHDAY BRAIN', matchup=''):
-    """Generate a fallback 1200x630 PNG for home/admin social cards."""
+    """Fallback home/admin card."""
     if Image is None:
         return None
 
-    W, H = 1200, 630
-    img = Image.new('RGB', (W, H), '#061437')
+    fake_fixture = {"home_team": "Matchday", "away_team": "Brain", "kickoff_utc": ""}
+    img = Image.new("RGB", (1200, 630), (3, 12, 34))
     draw = ImageDraw.Draw(img)
-
-    for y in range(H):
-        shade = int(16 + (y / H) * 28)
-        draw.line((0, y, W, y), fill=(4, 18 + shade // 2, 58 + shade))
+    for y in range(630):
+        t = y / 630
+        draw.line((0, y, 1200, y), fill=(3, int(14 + 20*t), int(48 + 72*t)))
 
     gold = (255, 207, 74)
-    white = (255, 255, 255)
-    muted = (206, 219, 248)
+    white = (255,255,255)
+    muted = (205, 219, 248)
 
-    draw.ellipse((760, 80, 1340, 760), fill=(14, 77, 190))
-    draw.ellipse((820, 150, 1280, 700), fill=(5, 26, 79))
-    for x in range(-150, 1250, 90):
-        draw.line((x, 0, x + 320, H), fill=(34, 80, 170), width=2)
-    draw.arc((-130, 390, 1340, 840), 196, 346, fill=gold, width=7)
+    draw.ellipse((720, 120, 1320, 700), fill=(12, 62, 170))
+    draw.arc((-80, 420, 1350, 820), 198, 342, fill=gold, width=8)
 
-    draw.rounded_rectangle((70, 54, 390, 112), radius=20, fill=gold, outline=(255, 234, 160), width=2)
-    draw.text((100, 70), '⚽ MATCHDAY BRAIN', fill=(8, 18, 41), font=_font(25, True))
+    draw.text((80, 70), "MATCHDAY", font=_font(52, True), fill=white)
+    draw.text((425, 70), "BRAIN", font=_font(52, True), fill=gold)
+    draw.text((84, 130), "FOOTBALL PREDICTOR", font=_font(25, True), fill=muted)
 
-    if matchup:
-        draw.rounded_rectangle((70, 128, 430, 174), radius=16, fill=(255, 255, 255))
-        draw.text((100, 140), matchup[:32], fill=(8, 18, 41), font=_font(20, True))
+    y = 220
+    for line in _wrap(draw, title, _font(58, True), 760)[:4]:
+        draw.text((80, y), line, font=_font(58, True), fill=white if "country" not in line.lower() else gold)
+        y += 65
+    y += 12
+    for line in _wrap(draw, subtitle, _font(28, False), 720)[:4]:
+        draw.text((82, y), line, font=_font(28, False), fill=muted)
+        y += 38
 
-    title_font = _font(62, True)
-    sub_font = _font(29, False)
-    y = 225
-    for line in _wrap(draw, title, title_font, 760)[:4]:
-        draw.text((70, y), line, fill=white if 'country' not in line.lower() else gold, font=title_font)
-        y += 70
-    y += 10
-    for line in _wrap(draw, subtitle, sub_font, 740)[:4]:
-        draw.text((75, y), line, fill=muted, font=sub_font)
-        y += 39
-
-    cx, cy, r = 915, 355, 150
-    draw.ellipse((cx-r, cy-r, cx+r, cy+r), fill=(10, 29, 82), outline=gold, width=6)
-    draw.polygon([(cx, cy-r+30), (cx+45, cy-25), (cx+24, cy+95), (cx-24, cy+95), (cx-45, cy-25)], fill=gold)
-    draw.ellipse((cx-70, cy-r+10, cx+70, cy-r+150), fill=gold, outline=(255, 235, 150), width=3)
-
-    draw.rounded_rectangle((70, 535, 615, 590), radius=20, fill=gold)
-    draw.text((100, 548), 'Pick the score. Guess the first goal.', fill=(8, 18, 41), font=_font(25, True))
+    # Simple premium football mark
+    draw.ellipse((820, 220, 1060, 460), fill=(8, 22, 60), outline=gold, width=7)
+    draw.ellipse((885, 275, 995, 385), fill=gold)
+    draw.rounded_rectangle((80, 540, 520, 595), radius=18, fill=gold)
+    draw.text((118, 553), "PLAY NOW", font=_font(31, True), fill=(5, 18, 52))
     return img
 
 
@@ -1867,14 +1886,28 @@ def admin_post_image(post_id):
     admin_required()
     conn = get_db()
     post = conn.execute('SELECT * FROM posts WHERE id=?', (post_id,)).fetchone()
-    conn.close()
     if not post:
+        conn.close()
         abort(404)
+
     body = str(post['body'] or '')
-    clean = ' '.join([part for part in body.replace('\n', ' ').split() if not part.startswith('http') and not part.startswith('#')])
-    img = generate_social_card(post['title'], clean[:180], 'MATCHDAY BRAIN', 'X post image')
+    link_url = str(post['link_url'] or '')
+    match = re.search(r'/match/(\d+)', body + ' ' + link_url)
+    img = None
+    if match:
+        fixture_id = int(match.group(1))
+        fixture = conn.execute('SELECT * FROM fixtures WHERE id=?', (fixture_id,)).fetchone()
+        entries = conn.execute('SELECT COUNT(*) FROM entries WHERE fixture_id=?', (fixture_id,)).fetchone()[0] if fixture else 0
+        if fixture:
+            img = generate_match_social_card(fixture, entries)
+    conn.close()
+
+    if img is None:
+        clean = ' '.join([part for part in body.replace('\n', ' ').split() if not part.startswith('http') and not part.startswith('#')])
+        img = generate_social_card(post['title'], clean[:180], 'MATCHDAY BRAIN', 'X post image')
     if img is None:
         abort(503)
+
     buf = io.BytesIO()
     img.save(buf, format='PNG', optimize=True)
     buf.seek(0)
