@@ -1950,6 +1950,104 @@ def og_match_image(fixture_id):
     return Response(buf.getvalue(), mimetype='image/png', headers={'Cache-Control': 'public, max-age=300'})
 
 
+
+def _match_share_version():
+    return request.args.get("v") or request.args.get("s") or datetime.now(UK_TZ).strftime("%Y%m%d%H%M")
+
+
+@app.route("/share/match/<int:fixture_id>")
+def share_match(fixture_id):
+    """Lightweight X/Facebook share landing page.
+
+    This exists because X often caches /match/<id>. Using /share/match/<id>?v=...
+    gives every admin post a fresh URL, so X re-scrapes the current og:image.
+    Human visitors are sent straight to the real match page.
+    """
+    conn = get_db()
+    fixture = conn.execute("SELECT * FROM fixtures WHERE id=?", (fixture_id,)).fetchone()
+    entries = conn.execute("SELECT COUNT(*) FROM entries WHERE fixture_id=?", (fixture_id,)).fetchone()[0] if fixture else 0
+    conn.close()
+    if not fixture:
+        abort(404)
+
+    version = _match_share_version()
+    match_url = absolute_url(url_for("match", fixture_id=fixture_id))
+    image_url = absolute_url(url_for("og_match_image", fixture_id=fixture_id)) + f"?v={version}"
+    title = f"{fixture['home_team']} v {fixture['away_team']} | Matchday Brain"
+    desc = f"{entries} fan call{'s' if int(entries) != 1 else ''} already in. Pick the score, guess the first goal and back your country."
+
+    html = f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{title}</title>
+  <meta name="description" content="{desc}">
+  <meta name="robots" content="noindex,follow">
+  <link rel="canonical" href="{match_url}">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Matchday Brain">
+  <meta property="og:title" content="{title}">
+  <meta property="og:description" content="{desc}">
+  <meta property="og:url" content="{absolute_url(url_for('share_match', fixture_id=fixture_id))}?v={version}">
+  <meta property="og:image" content="{image_url}">
+  <meta property="og:image:secure_url" content="{image_url}">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{title}">
+  <meta name="twitter:description" content="{desc}">
+  <meta name="twitter:image" content="{image_url}">
+
+  <meta http-equiv="refresh" content="1; url={match_url}">
+  <style>
+    body {{ margin:0; min-height:100vh; display:grid; place-items:center; background:#06133a; color:white; font-family:Arial,sans-serif; }}
+    a {{ color:#ffcf4a; font-weight:800; }}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>{title}</h1>
+    <p>{desc}</p>
+    <p><a href="{match_url}">Play this match now</a></p>
+  </main>
+</body>
+</html>"""
+    return Response(html, mimetype="text/html", headers={"Cache-Control": "public, max-age=300"})
+
+
+@app.route("/admin/posts/<int:post_id>/x")
+def admin_post_to_x(post_id):
+    """Open X composer using a fresh share URL so the preview card updates."""
+    admin_required()
+    conn = get_db()
+    post = conn.execute("SELECT * FROM posts WHERE id=?", (post_id,)).fetchone()
+    conn.close()
+    if not post:
+        abort(404)
+
+    body = str(post["body"] or "").strip()
+    link_url = str(post["link_url"] or "").strip()
+    combined = body + " " + link_url
+    match = re.search(r"/match/(\d+)", combined)
+
+    # Remove raw URLs from the tweet text. X will receive the URL separately via the url= parameter.
+    text_no_urls = " ".join([part for part in body.replace("\n", " \n ").split(" ") if not part.startswith("http")])
+    text_no_urls = "\n".join([line.strip() for line in text_no_urls.split("\n")])
+    text_no_urls = re.sub(r"\n{3,}", "\n\n", text_no_urls).strip()
+
+    if match:
+        fixture_id = int(match.group(1))
+        version = f"post{post_id}-{datetime.now(UK_TZ).strftime('%Y%m%d%H%M')}"
+        share_url = absolute_url(url_for("share_match", fixture_id=fixture_id)) + f"?v={version}"
+    else:
+        share_url = link_url or public_base_url()
+
+    return redirect(f"https://twitter.com/intent/tweet?text={quote_plus(text_no_urls)}&url={quote_plus(share_url)}")
+
+
 @app.route('/admin/posts/<int:post_id>/image.png')
 def admin_post_image(post_id):
     admin_required()
