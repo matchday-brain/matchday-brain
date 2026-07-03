@@ -1,0 +1,37 @@
+
+<!doctype html>
+<html>
+<head>
+  <title>Invictus Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="admin">
+  <div class="brand">
+    <img src="{{ url_for('static', filename='img/invictus-logo.png') }}" alt="Invictus">
+    <div class="brandText">INVICTUS<span>ADMIN</span></div>
+  </div>
+  <h1>Product Module Admin</h1>
+  {% if saved %}<p style="color:var(--lime);font-weight:900">Saved successfully.</p>{% endif %}
+  <p><a href="/" class="btn btnGhost">Back to website</a></p>
+  <form method="post">
+    <table>
+      <thead><tr><th>Item</th><th>Category</th><th>Price</th><th>Width mm</th><th>Description</th></tr></thead>
+      <tbody>
+      {% for m in modules %}
+      <tr>
+        <td><input name="{{m.id}}_name" value="{{m.name}}"></td>
+        <td><input name="{{m.id}}_category" value="{{m.category}}"></td>
+        <td><input name="{{m.id}}_price" value="{{m.price}}"></td>
+        <td><input name="{{m.id}}_width" value="{{m.width}}"></td>
+        <td><input name="{{m.id}}_description" value="{{m.description}}"></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <p><button class="btn btnPrimary">Save Changes</button></p>
+  </form>
+</div>
+</body>
+</html>
