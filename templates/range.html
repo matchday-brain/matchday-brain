@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}BBQ Range | Invictus Outdoor Living{% endblock %}
+{% block content %}
+<section class="page-hero range-hero"><div><p class="eyebrow">The BBQ collection</p><h1>Serious cooking.<br>Quiet confidence.</h1><p>Robust live-fire grills, designed for memorable food and years of service.</p></div></section>
+<section class="range-list">
+{% for product in products[:2] %}
+<article class="range-item">
+  <img src="{{ url_for('static', filename='img/' + product.image) }}" alt="{{ product.name }}">
+  <div><p class="eyebrow">Invictus collection</p><h2>{{ product.name }}</h2><p>{{ product.description }}</p><ul><li>British engineered construction</li><li>Adjustable live-fire cooking</li><li>Premium stainless and coated finishes</li><li>Made for outdoor use</li></ul><strong>From £{{ "{:,.0f}".format(product.price) }}</strong><a class="btn primary" href="/contact">Enquire</a></div>
+</article>
+{% endfor %}
+</section>
+<section class="bespoke-banner"><div><p class="eyebrow">Need something different?</p><h2>Commission a BBQ built around you.</h2><p>Choose proportions, finish, cooking system, storage and accessories.</p></div><a class="btn primary" href="/bespoke">Create yours</a></section>
+{% endblock %}

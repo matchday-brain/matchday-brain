@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Inspiration | Invictus Outdoor Living{% endblock %}
+{% block content %}
+<section class="page-hero gallery-hero"><div><p class="eyebrow">Inspiration</p><h1>Good food.<br>Beautiful spaces.</h1><p>Outdoor living is as much about the atmosphere as the equipment.</p></div></section>
+<section class="gallery-grid">
+  <figure class="wide"><img src="{{ url_for('static', filename='img/gallery-garden.jpg') }}"><figcaption>Gardens made for gathering</figcaption></figure>
+  <figure><img src="{{ url_for('static', filename='img/gallery-burger.jpg') }}"><figcaption>Food worth staying outside for</figcaption></figure>
+  <figure><img src="{{ url_for('static', filename='img/gallery-drinks.jpg') }}"><figcaption>Long afternoons, longer evenings</figcaption></figure>
+  <figure><img src="{{ url_for('static', filename='img/gallery-build.jpg') }}"><figcaption>Built with purpose</figcaption></figure>
+  <figure class="wide"><img src="{{ url_for('static', filename='img/gallery-bake.jpg') }}"><figcaption>Fire, flavour and craft</figcaption></figure>
+</section>
+{% endblock %}

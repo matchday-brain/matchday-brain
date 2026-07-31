@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Bespoke BBQ Design | Invictus Outdoor Living{% endblock %}
+{% block content %}
+<section class="page-hero bespoke-hero"><div><p class="eyebrow">Bespoke by Invictus</p><h1>One barbecue.<br>Built entirely around you.</h1><p>Our main point of difference: a genuinely custom design service, backed by British engineering and manufacture.</p></div></section>
+<section class="bespoke-intro split"><div><p class="eyebrow">Begin your commission</p><h2>Shape the way you cook outdoors.</h2></div><div><p>Start with the essentials, then add the features that matter to you. This early configurator provides a guide price; our team then develops the design with you.</p></div></section>
+
+<section class="configurator">
+  <div class="config-options">
+    <div class="step"><span>01</span><h3>Choose your finish</h3>
+      <label><input type="radio" name="finish" value="black" checked><i class="swatch black"></i>Signature black</label>
+      <label><input type="radio" name="finish" value="stainless"><i class="swatch steel"></i>Brushed stainless</label>
+      <label><input type="radio" name="finish" value="corten"><i class="swatch corten"></i>Weathered steel</label>
+    </div>
+    <div class="step"><span>02</span><h3>Add the features</h3>
+      <div class="check-grid">
+        <label><input type="checkbox" value="prep">Preparation surface</label>
+        <label><input type="checkbox" value="storage">Enclosed storage</label>
+        <label><input type="checkbox" value="sink">Sink and tap</label>
+        <label><input type="checkbox" value="fridge">Outdoor fridge</label>
+        <label><input type="checkbox" value="pizza">Pizza oven station</label>
+        <label><input type="checkbox" value="bar">Bar and serving area</label>
+        <label><input type="checkbox" value="pergola">Pergola structure</label>
+        <label><input type="checkbox" value="lighting">Integrated lighting</label>
+      </div>
+    </div>
+    <div class="step"><span>03</span><h3>Tell us about your space</h3>
+      <textarea id="brief" placeholder="Approximate size, straight or corner layout, how many people you entertain, preferred fuel and anything else you have in mind."></textarea>
+    </div>
+  </div>
+  <aside class="config-summary">
+    <img src="{{ url_for('static', filename='img/hero-bbq.jpg') }}">
+    <p class="eyebrow">Indicative starting price</p>
+    <div class="estimate" id="estimate">£3,500</div>
+    <p>Your guide price updates as you add features. Final pricing follows design review and confirmation.</p>
+    <button class="btn primary" onclick="calculateQuote()">Update estimate</button>
+    <a class="btn ghost dark-ghost" href="/contact">Discuss your project</a>
+  </aside>
+</section>
+
+<section class="process">
+  <div class="section-head"><div><p class="eyebrow">How it works</p><h2>From first sketch to first fire.</h2></div></div>
+  <div class="process-grid">
+    <div><span>01</span><h3>Conversation</h3><p>We understand your garden, cooking preferences and budget.</p></div>
+    <div><span>02</span><h3>Design</h3><p>We develop the layout, proportions, features and finish.</p></div>
+    <div><span>03</span><h3>Manufacture</h3><p>Your build is precision fabricated and assembled in Britain.</p></div>
+    <div><span>04</span><h3>Delivery</h3><p>We arrange delivery and discuss installation requirements.</p></div>
+  </div>
+</section>
+{% endblock %}

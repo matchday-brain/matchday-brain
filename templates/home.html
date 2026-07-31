@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Invictus Outdoor Living | Premium British BBQs{% endblock %}
+{% block content %}
+<section class="hero hero-home">
+  <div class="hero-copy">
+    <p class="eyebrow">British engineered outdoor cooking</p>
+    <h1>Built for fire.<br>Made for living.</h1>
+    <p class="lead">Premium BBQs and bespoke outdoor cooking spaces, designed to become the heart of your garden.</p>
+    <div class="actions"><a class="btn primary" href="/range">Explore the range</a><a class="btn ghost" href="/bespoke">Create a bespoke BBQ</a></div>
+  </div>
+  <div class="hero-note"><span>01</span><p>Every Invictus build combines honest materials, practical engineering and timeless design.</p></div>
+</section>
+
+<section class="intro split">
+  <div>
+    <p class="eyebrow">More than a barbecue</p>
+    <h2>A place to cook, gather and stay awhile.</h2>
+  </div>
+  <div>
+    <p>Invictus Outdoor Living creates premium grills and complete outdoor cooking spaces. From a standalone live-fire barbecue to a fully bespoke entertaining area, every piece is designed around real moments: food, family, friends and long evenings outside.</p>
+    <a class="text-link" href="/about">Discover our approach →</a>
+  </div>
+</section>
+
+<section class="image-feature">
+  <img src="{{ url_for('static', filename='img/bbq-workshop.jpg') }}" alt="Invictus barbecue in manufacture">
+  <div class="image-card">
+    <p class="eyebrow">The main event</p>
+    <h2>Engineered around fire.</h2>
+    <p>Heavy-duty construction, adjustable cooking heights and generous grill space. Designed to perform, built to last.</p>
+    <a class="btn dark" href="/range">View BBQs</a>
+  </div>
+</section>
+
+<section class="cards-section">
+  <div class="section-head"><div><p class="eyebrow">Our collection</p><h2>Choose your starting point.</h2></div><a class="text-link" href="/range">See all models →</a></div>
+  <div class="product-cards">
+    {% for product in products %}
+    <article class="product-card">
+      <img src="{{ url_for('static', filename='img/' + product.image) }}" alt="{{ product.name }}">
+      <div><span>{% if product.price %}From £{{ "{:,.0f}".format(product.price) }}{% else %}Made to commission{% endif %}</span><h3>{{ product.name }}</h3><p>{{ product.description }}</p><a href="{% if product.id == 'bespoke' %}/bespoke{% else %}/range{% endif %}">Discover →</a></div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="lifestyle-grid">
+  <div class="large"><img src="{{ url_for('static', filename='img/lifestyle-drinks.jpg') }}"><div><p class="eyebrow">Outdoor living</p><h2>Designed for the best part of the day.</h2></div></div>
+  <div><img src="{{ url_for('static', filename='img/food-burger.jpg') }}"><p>Cook without compromise.</p></div>
+  <div><img src="{{ url_for('static', filename='img/food-bake.jpg') }}"><p>From fire to table.</p></div>
+</section>
+
+<section class="bespoke-banner">
+  <div><p class="eyebrow">Our signature service</p><h2>Your garden. Your cooking style. Your Invictus.</h2><p>Create a one-off barbecue or a complete outdoor kitchen, tailored to your space and how you entertain.</p></div>
+  <a class="btn primary" href="/bespoke">Start your design</a>
+</section>
+{% endblock %}

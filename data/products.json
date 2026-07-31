@@ -1,0 +1,23 @@
+[
+  {
+    "id": "open_fire",
+    "name": "The Foundry Grill",
+    "price": 4250,
+    "description": "A statement charcoal grill with adjustable cooking height, warming canopy and generous open-fire cooking area.",
+    "image": "bbq-workshop.jpg"
+  },
+  {
+    "id": "garden_station",
+    "name": "The Garden Station",
+    "price": 6950,
+    "description": "A complete entertaining station with prep space, storage and a professional live-fire grill at its centre.",
+    "image": "hero-bbq.jpg"
+  },
+  {
+    "id": "bespoke",
+    "name": "Bespoke Commission",
+    "price": 0,
+    "description": "Designed around your garden, cooking style and entertaining needs. Every commission starts with a conversation.",
+    "image": "gallery-garden.jpg"
+  }
+]

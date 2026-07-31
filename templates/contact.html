@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Contact | Invictus Outdoor Living{% endblock %}
+{% block content %}
+<section class="contact-page">
+  <div class="contact-copy"><p class="eyebrow">Start a conversation</p><h1>Tell us what you would love to build.</h1><p>Whether you are considering a standalone barbecue or a complete bespoke outdoor cooking space, share your ideas and we will help shape the next step.</p><div class="contact-detail"><b>Invictus Outdoor Living</b><span>Manufactured by CE Turner</span><span>United Kingdom</span></div></div>
+  <form class="contact-form">
+    <label>Name<input placeholder="Your name"></label>
+    <label>Email<input type="email" placeholder="you@example.com"></label>
+    <label>Telephone<input placeholder="Your number"></label>
+    <label>Project type<select><option>Standalone BBQ</option><option>Bespoke BBQ</option><option>Outdoor kitchen</option><option>Commercial project</option></select></label>
+    <label class="full">Tell us about your project<textarea placeholder="Your space, ideas, preferred style and approximate budget."></textarea></label>
+    <button class="btn primary">Send enquiry</button>
+  </form>
+</section>
+{% endblock %}
